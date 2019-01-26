@@ -30,7 +30,7 @@
                 <span slot="label">我的</span>
             </tabbar-item> 
         </tabbar>
-        <popup v-model="popup1" height="280px">
+        <popup v-model="popup1">
             <div class="more-handle">
                 <div class="more-handle-body">
                     <router-link to="./write_follow">
@@ -57,6 +57,10 @@
                         <span style="background: #1976D2;"><i class="iconfont icon-hetong2"></i></span>
                         <p>新增合同</p>
                     </router-link>
+                    <router-link to="./letter_add">
+                        <span style="background: #7c8dc1;"><i class="iconfont icon-yijianfankui"></i></span>
+                        <p>发站内信</p>
+                    </router-link>
                 </div>
                 <div class="more-handle-footer">
                     <span @click="popup1 = false"><i class="iconfont icon-close"></i></span>
@@ -81,8 +85,14 @@ export default {
             index: 0,
             showMore: false,
             popup1: false,
-            
+            routerList: ["/index", "/crm", "/book", "/mine"]
         }
+    },
+    activated(){
+        this.index = this.routerList.indexOf(this.$router.currentRoute.path)
+    },
+    destroyed(){
+        this.index = -1
     },
     methods: {
         changeTab(url, index){
@@ -197,7 +207,6 @@ function getStylePropertyValue(dom, property) {
     }   
     .more-handle{
         width: 100%;
-        height: 250px;
         padding-top: 30px;
         background: #fff;
         overflow: hidden;
@@ -227,6 +236,7 @@ function getStylePropertyValue(dom, property) {
             position: relative;
             border-top: 1px solid #ddd;
             text-align: center;
+            height: 40px;
             &:before{
                 position: absolute;
                 top: 0;

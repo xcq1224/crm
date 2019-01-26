@@ -2,13 +2,12 @@
     <div class="page"> 
         <swiper class="crm_detial_header" dots-class="dots" :auto='false' dots-position="center">
             <swiper-item class="item1">
-                <p class="title">{{baseInfo.opportunityName}}</p>
-                <p>预计营销金额(万元)：{{baseInfo.amount}}</p>
-                <p>营销阶段：{{baseInfo.marketingSection}}({{baseInfo.dealPossible}})</p>
+                <p class="title">{{baseInfo.name}}</p>
+                <p>跟进状态：{{baseInfo.followStatus || '———'}}</p>
             </swiper-item>
             <swiper-item class="item2">
                 <p>参与成员：</p>
-                <router-link :to="'./client_member?id=' + baseInfo.id + '&moduleName=crm_marketing_opportunity&moduleNames=机会&isPublic=' + baseInfo.isPublic" class="user-list">
+                <router-link :to="'./client_member?id=' + baseInfo.id + '&moduleName=crm_partner&moduleNames=合作伙伴&isPublic=' + baseInfo.isPublic" class="user-list">
                     <span v-show="baseInfo.isPublic == 1"><i style="float: inherit;vertical-align: sub;" class="iconfont icon-gongkai"></i></span>
                     <span v-if="index<7" :class="item.isOwner ? 'admin' : ''" v-for="(item, index) in memberList" :key="index">
                         <img v-if="item.avatar" :src="item.avatar" alt="">
@@ -21,12 +20,12 @@
             </swiper-item>
         </swiper>
         <div class="main">
-            <tab class="vux-1px-b" :line-width=2 custom-bar-width="80%" :scroll-threshold='6' v-model="tabIndex">
+            <tab class="vux-1px-b" :line-width=2 custom-bar-width="80%" :scroll-threshold='7' v-model="tabIndex">
                 <tab-item class="vux-center" :selected="tabIndex == 0" @click="tabIndex = 0">动态</tab-item>
                 <tab-item class="vux-center" :selected="tabIndex == 1" @click="tabIndex = 1">详情</tab-item>
                 <tab-item class="vux-center" :selected="tabIndex == 2" @click="tabIndex = 2">联系人</tab-item>
-                <tab-item class="vux-center" :selected="tabIndex == 3" @click="tabIndex = 3">竞争对手</tab-item>
-                <tab-item class="vux-center" :selected="tabIndex == 4" @click="tabIndex = 4">合同</tab-item>
+                <tab-item class="vux-center" :selected="tabIndex == 3" @click="tabIndex = 3">线索</tab-item>
+                <tab-item class="vux-center" :selected="tabIndex == 4" @click="tabIndex = 4">机会</tab-item>
                 <tab-item class="vux-center" :selected="tabIndex == 5" @click="tabIndex = 5">附件</tab-item>
                 <tab-item class="vux-center" :selected="tabIndex == 6" @click="tabIndex = 6">日志</tab-item>
             </tab>
@@ -49,45 +48,39 @@
                         </div>
                     </div>
                     <div class="footer">
-                        <router-link v-if="isModify" class="footer-tab" :to="'./opportunity_follow?id=' + baseInfo.id + '&name=' + baseInfo.opportunityName + '&customerId=' + baseInfo.customerId">写跟进</router-link>
-                        <router-link class="footer-tab vux-1px-l" :to="'./opportunity_contract?id=' + baseInfo.id">转化合同</router-link>
+                        <router-link v-if="isModify" class="footer-tab" :to="'./partner_follow?id=' + baseInfo.id + '&name=' + baseInfo.name">写跟进</router-link>
+                        <router-link class="footer-tab vux-1px-l" :to="'./visit_sign?id=' + baseInfo.id + '&name=' + baseInfo.name">拜访签到</router-link>
                         <div class="footer-tab vux-1px-l" v-if="isOwner">
                             <div @click="showSubbat = !showSubbat">更多</div>
                             <div v-show="showSubbat" @click="showSubbat = false" class="footer-subtab vux-1px-l">
-                                <div class="vux-1px-b" @click="popup2 = true" v-if="baseInfo.opportunityState != '已关闭'">关闭</div>
-                                <div class="vux-1px-b" @click="delOppo">删除</div>
-                                <div @click="popup3 = true">转给他人</div>
+                                <div class="vux-1px-b" @click="delCustomer">删除</div>
+                                <div @click="popup2 = true">转给他人</div>
                             </div>
                         </div>
                     </div>
                 </swiper-item>
                 <swiper-item class="tab-item2">
                     <div class="scroll-box" :style="isModify ? '' : 'padding-bottom: 0'">
-                        <x-table :cell-bordered="false" :content-bordered="false" :full-bordered="false">
-                            <tr>
-                                <td width='80'>客户</td>
-                                <td>{{baseInfo.customerName}}</td>
-                            </tr>
-                            <tr>
-                                <td width='80'>机会编码</td>
-                                <td>{{baseInfo.opportunityNo}}</td>
-                            </tr>
-                            <tr v-for="(item, index) in fieldList" :key="index">
+                        <x-table :cell-bordered="false" :content-bordered="false" :full-bordered="false" class="vux-table-default">
+                            <tr v-for="(item, index) in fieldList" :key="index" v-if="item.editorType != 'tableItem'">
                                 <td width='80'>{{item.label}}</td>
-                                <td v-if="item.editorType != 'cascade'">{{baseInfo[item.name]}}</td>
-                                <td v-if="item.editorType == 'cascade'">{{baseInfo[item.name].join("/")}}</td>
-                            </tr>
-                            <tr>
-                                <td width='80'>线索</td>
-                                <td>{{baseInfo.marketingClueName}}</td>
-                            </tr>
-                            <tr>
-                                <td width='80'>合作伙伴</td>
-                                <td>{{baseInfo.partnerName}}</td>
-                            </tr>
-                            <tr>
-                                <td width='80'>机会状态</td>
-                                <td>{{baseInfo.opportunityState}}</td>
+                                <td v-if="item.editorType != 'cascade' && item.editorType != 'table'">{{baseInfo[item.name]}}</td>
+                                <td v-if="item.editorType == 'cascade'">{{baseInfo[item.name] ? baseInfo[item.name].join("/") : ''}}</td>
+                                <td v-if="item.editorType == 'table'" style="padding: 0 10px 0 0;">
+                                    <x-table full-bordered class="custom-table">
+                                        <thead>
+                                            <tr>
+                                                <td v-for="(item1, index1) in tableNameObj[item.name]" :key="index1">{{item1.label}}</td>
+                                            </tr>
+                                        </thead>
+                                        <tr v-show="!(baseInfo[item.name] && baseInfo[item.name].length)">
+                                            <td colspan="100">暂无数据</td>
+                                        </tr>
+                                        <tr v-if="baseInfo[item.name] && baseInfo[item.name].length" v-for="(item2, index2) in baseInfo[item.name]" :key="index2">
+                                            <td v-for="(item1, index1) in tableNameObj[item.name]" :key="index1">{{item2[item1.name]}}</td>
+                                        </tr>
+                                    </x-table>
+                                </td>
                             </tr>
                             <tr>
                                 <td width='80'>拥有者</td>
@@ -101,74 +94,70 @@
                                 <td width='80'>创建时间</td>
                                 <td>{{baseInfo.createTime}}</td>
                             </tr>
-                            <tr v-show="baseInfo.opportunityState == '已关闭'">
-                                <td width='80'>关闭原因</td>
-                                <td>{{baseInfo.closeReason}}</td>
-                            </tr>
-                            <tr v-show="baseInfo.opportunityState == '已关闭'">
-                                <td width='80'>关闭人</td>
-                                <td>{{baseInfo.closePerson}}</td>
-                            </tr>
-                            <tr v-show="baseInfo.opportunityState == '已关闭'">
-                                <td width='80'>关闭时间</td>
-                                <td>{{baseInfo.closeTime}}</td>
-                            </tr>
                         </x-table>
                     </div>
                     <div class="handle" v-if="isModify">
-                        <router-link :to="'./opportunity_add?handleType=1&id=' + baseInfo.id">编辑</router-link>
+                        <router-link :to="'./partner_add?handleType=1&id=' + baseInfo.id">编辑</router-link>
                     </div>
                 </swiper-item>
                 <swiper-item class="tab-item3">
-                    <div class="scroll-box">
-                        <div class="contacts" v-for="(item, index) in contacts" :key="index">
-                            <span class="img">
-                                <img src="../assets/avatar.jpg" alt=""> 
-                                <i v-if="item.oppoInfo.isMaster" class="iconfont icon-geren"></i>
-                            </span>
-                            <p class="text_base" @click="jumpCheck('contacts_detail', item.customerId, '', item.id)">{{item.name}}</p>
-                            <p class="text_ccc font12">{{item.oppoInfo.role}}</p>
-                            <router-link v-if="isModify" class="edit" :to="'./relation_contacts?handleType=1&id=' + item.oppoInfo.id + '&customerId=' + baseInfo.customerId">
-                                <i class="iconfont icon-bianji1"></i>  
-                            </router-link>
-                        </div>
+                    <div class="scroll-box" v-if="contacts.length">
+                        <router-link :to="'./contacts_detail?id='+item.id" style="display: block;" class="contacts text_base" v-for="(item, index) in contacts" :key="index">
+                            <img v-if="item.avatar" :src="item.avatar" alt="">
+                            <img v-if="!item.avatar" src="../assets/avatar.jpg" alt="">
+                            {{item.name}}
+                        </router-link>
+                    </div>
+                    <div v-else>
+                        <p class="iconfont icon-zanwushuju1" style="font-size: 160px;color: #ccc;text-align: center;"></p>
                     </div>
                     <div class="handle">
-                        <router-link :to="'./relation_contacts?handleType=0&oppoId=' + query.id + '&customerId=' + baseInfo.customerId">添加关联联系人</router-link>
+                        <router-link :to="'./contacts_add?handleType=2&customerId=' + baseInfo.id">新增</router-link>
+                    </div>
+                </swiper-item>
+                <swiper-item class="tab-item8">
+                    <div v-if="clues.length">
+                        <div @click="jumpCheck('clue_detail', item.id)" class="list-item" v-for="(item, index) in clues" :key="index">
+                            <p>
+                                <span  class="inline_block text-ellipsis w270 text_base">{{item.name}}</span>
+                                <span class="float_r font12">{{item.createTime.split(' ')[0]}}</span>
+                            </p> 
+                            <p>
+                                <span class="inline_block text-ellipsis w270">{{item.mobilePhone}}</span>
+                                <span class="float_r font12">{{item.followStatus}}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <p class="iconfont icon-zanwushuju1" style="font-size: 160px;color: #ccc;text-align: center;"></p>
                     </div>
                 </swiper-item>
                 <swiper-item class="tab-item4">
-                    <div class="scroll-box">
-                        <div class="list-item" v-for="(item, index) in competitors" :key="index">
+                    <div v-if="opportunitys.length">
+                        <div @click="jumpCheck('opportunity_detail', item.id)" class="list-item" v-for="(item, index) in opportunitys" :key="index">
                             <p>
-                                <span  class="inline_block text-ellipsis w270 text_333">{{item.competitorName}}</span>
+                                <span  class="inline_block text-ellipsis w270 text_base">{{item.opportunityName}}</span>
                                 <span class="float_r font12">{{item.createTime.split(' ')[0]}}</span>
                             </p> 
-                            <p><span class="inline_block text-ellipsis w270">{{item.competitorPrice}}万元</span></p>
+                            <p><span class="inline_block text-ellipsis w_100">{{item.amount}}万元&nbsp;&nbsp;{{item.customerName}}</span></p>
                         </div>
                     </div>
-                    <div class="handle">
-                        <router-link to="">添加竞争对手</router-link>
-                    </div>
-                </swiper-item>
-                <swiper-item class="tab-item5">
-                    <div class="scroll-box">
-                        <div @click="jumpCheck('contract_detail', item.id, 'crm_marketing_contract')" class="list-item" v-for="(item, index) in contracts" :key="index">
-                            <p>
-                                <span  class="inline_block text-ellipsis w270 text_base">{{item.contractName}}</span>
-                                <span class="float_r font12">{{item.createTime.split(' ')[0]}}</span>
-                            </p> 
-                            <p><span class="inline_block text-ellipsis w270">{{item.contracAmount}}万元</span><span class="float_r font12">{{item.contractState}}</span></p>
-                        </div>
+                    <div v-else>
+                        <p class="iconfont icon-zanwushuju1" style="font-size: 160px;color: #ccc;text-align: center;"></p>
                     </div>
                 </swiper-item>
                 <swiper-item class="tab-item6">
-                    <div class="list-item" v-for="(item, index) in annexList" :key="index">
-                        <p>
-                            <span  class="inline_block text-ellipsis w320 text_333">{{item.fileName}}</span>
-                            <span class="float_r" v-if="isOwner"><i class="iconfont icon-shanchu icon_handle" @click="delAnnex(item.id)"></i></span>
-                        </p> 
-                        <p><span class="font12">{{iosDate(item.upTime, 'yyyy-MM-dd hh:mm:ss')}}</span></p>
+                    <div v-if="annexList.length">
+                        <div class="list-item" v-for="(item, index) in annexList" :key="index">
+                            <p>
+                                <span  class="inline_block text-ellipsis w320 text_333">{{item.fileName}}</span>
+                                <span class="float_r" v-if="isOwner"><i class="iconfont icon-shanchu icon_handle" @click="delAnnex(item.id)"></i></span>
+                            </p> 
+                            <p><span class="font12">{{iosDate(item.upTime, 'yyyy-MM-dd hh:mm:ss')}}</span></p>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <p class="iconfont icon-zanwushuju1" style="font-size: 160px;color: #ccc;text-align: center;"></p>
                     </div>
                 </swiper-item>
                 <swiper-item class="tab-item7">
@@ -182,21 +171,25 @@
                 </swiper-item>
             </swiper>
         </div>
+        <!-- 转给他人选择拥有者 -->
         <!-- 转给他人弹框 -->
-        <popup v-model="popup3" class="turn-box" @on-show="showPopup3" height="100%">
+        <popup v-model="popup2" class="turn-box" @on-show="showPopup2" height="100%">
             <group gutter='0' label-width="150px">
                 <cell is-link title="新拥有者" @click.native="popup1 = true" v-model="staffName" class="font14"></cell>
                 <cell class="font14">
                     <div slot="title" style="width: 200px;">保留原拥有者为团队成员</div>
                     <check-icon :value.sync="checkBox1"></check-icon>
                 </cell>
+                <cell title="转移相关业务" class="font14">
+                    <check-icon :value.sync="checkBox2"><span class="text_777 float_r">线索</span></check-icon>
+                    <check-icon :value.sync="checkBox3"><span class="text_777 float_r">机会</span></check-icon>
+                </cell>
             </group>
             <div class="add">
-                <a class=" vux-1px-r" @click="popup3 = false">取消</a>
+                <a class=" vux-1px-r" @click="popup2 = false">取消</a>
                 <a @click="turnSave">确定</a>
             </div>
         </popup>
-        <!-- 转给他人 -->
         <popup v-model="popup1" @on-show="showPopup1" height="100%">
             <div class="popup0">
                 <search
@@ -212,17 +205,6 @@
                 </search>
             </div>
         </popup>
-        <!-- 关闭 -->
-        <popup v-model="popup2" @on-show="showPopup2" height="100%">
-            <div class="popup0">
-                <div class="close-box" style="padding: 8px 16px;background: #fff; border-bottom: 1px solid #ddd;">
-                    <span @click="popup2 = false">取消</span>
-                    <span class="text_base float_r" @click="close">确定</span>
-                </div>
-                <x-textarea placeholder="请填写关闭原因" v-model="reason" :rows='5' :max="100" :autosize="true" style="background: #fff;"></x-textarea>
-                <p style="padding: 5px 12px;font-size: 12px;color: red;">*关闭不可恢复</p>
-            </div>
-        </popup>
     </div>
 </template>
 
@@ -230,7 +212,7 @@
 
     import { XHeader, Actionsheet, TransferDom, ButtonTab, ButtonTabItem } from 'vux'
     import { Divider } from 'vux'
-    import { Tab, TabItem, Sticky, XButton, Swiper, SwiperItem, XTable, Search, Popup, XTextarea, Group, Cell, CheckIcon } from 'vux'
+    import { Tab, TabItem, Sticky, XButton, Swiper, SwiperItem, XTable, Search, Popup, Group, Cell, CheckIcon } from 'vux'
 
     export default {
         components: {
@@ -249,15 +231,14 @@
             XTable,
             Search,
             Popup,
-            XTextarea,
-            Group, 
+            Group,
             Cell,
             CheckIcon,
         },
         data () {
             return {
                 tabIndex: 0,
-                showSubbat: false,
+                showSubbat: false,      //  显示更多
 
                 query: {},              //  页面传参
                 baseInfo: {},           //  详细信息
@@ -265,57 +246,60 @@
                 isModify: false,        //  是否有编辑权限
                 isDownload: false,      //  是否有下载权限
                 isOwner: false,         //  是否是拥有者
-                
-                /********************跟进记录********************* */
+                addLabel: [],           
+                tableNameObj: {},						//	自定义表格字段
+
+            /********************跟进记录********************* */
                 follows: [],
-                fieldList: [],      //  详情字段列表
-                contacts: [],       //  联系人
-                competitors: [],       //  竞争对手
-                contracts: [],   //  机会
+                fieldList: [],      //  客户字段列表
+                contacts: [],       //  联系人列表
+                opportunitys: [],   //  机会
+                clues: [],          //  线索
                 annexList: [],      //  附件
                 logs: [],                   //  日志
 
+                //  搜索
+                is_search: false,
+                results: [],
+                searchValue: '',
+            /*********************转给他人********************** */
+                popup2: false,                      
+                staffName: '',              //  转给他人姓名
+                staffId: '',              //  转给他人id
+                checkBox1: false,           //  保留原拥有者为团队成员
+                checkBox2: false,           //  转移线索
+                checkBox3: false,           //  转移机会
                 //  拥有者
                 popup1: false,
                 results1: [],                        //  搜索结果
                 staffs: [],
                 searchValue1: '',                    //  搜索文本
-                popup3: false,                      
-                staffName: '',              //  转给他人姓名
-                staffId: '',              //  转给他人id
-                checkBox1: false,           //  保留原拥有者为团队成员
-
-                //  关闭
-                popup2: false,
-                reason: '',
             }
         },
-        activated(){
-            this.showSubbat = false
-            this.$vux.loading.show()
-            this.query = this.$router.currentRoute.query
-            this.getBaseInfo()
-            this.getMembers()
+        mounted(){
             this.getAllStaff()
         },
+        activated(){
+            // this.tabIndex = 0
+            this.baseInfo = {}
+            this.follows = []
+            this.$vux.loading.show()
+            this.query = this.$router.currentRoute.query
+            this.$post("/crm/partnerDetailPR/queryPartnerForOne", {id: this.query.id}, (data) => {
+                this.baseInfo = data.basicInfo
+                this.isModify = data.isModify
+                this.isDownload = data.isDownload
+                this.isOwner = data.isOwner
+                this.follows = data.follows
+                this.getInfoByindex(this.tabIndex)
+            })
+            this.getMembers()
+        },
+        deactivated(){
+            
+        },
+        
         methods: {
-            //  获取基本信息
-            getBaseInfo(){
-                this.$post("/crm/opportunityDetailPR/queryOpportunityForOne", {id: this.query.id, moduleName: 'crm_marketing_opportunity'}, (data) => {
-                    this.baseInfo = data.opportunity
-                    this.isModify = data.isModify
-                    this.isDownload = data.isDownload
-                    this.isOwner = data.isOwner
-                    this.follows = data.follows
-                    this.getInfoByindex(this.tabIndex)
-                })
-            },
-            //  获取团队成员
-            getMembers(){
-                this.$post("/crm/memberPR/getAll", {"parentId": this.query.id, "moduleName": "crm_marketing_opportunity"}, (data) => {
-                    this.memberList = data.list
-                })
-            },
             //  根据当前swiper来加载对应内容
             getInfoByindex(val){
                 if(val == 1){
@@ -325,10 +309,10 @@
                     this.getContacts()
                 }
                 if(val == 3){
-                    this.getCompetitors()
+                    this.getClues()
                 }
                 if(val == 4){
-                    this.getContracts()
+                    this.getOpportunitys()
                 }
                 if(val == 5){
                     this.getAttachs()
@@ -337,13 +321,19 @@
                     this.getLogs()
                 }
             },
-            //  删除机会
-            delOppo(){
+            //  获取团队成员
+            getMembers(){
+                this.$post("/crm/memberPR/getAll", {"parentId": this.query.id, "moduleName": "crm_partner"}, (data) => {
+                    this.memberList = data.list
+                })
+            },
+            //  删除客户
+            delCustomer(){
                 this.$vux.confirm.show({
                     content: '您确定删除吗？',
                     onCancel: () => {},
                     onConfirm: () => {
-                        this.$post('/crm/opportunityPR/deleteOpportunity', {"list": [this.query.id]}, (data) => {
+                        this.$post('/crm/partnerPR/delete', {"list": [this.baseInfo.id]}, (data) => {
                             if(data.message){
                                 this.toastFail(data.message, "200px")
                             }else{
@@ -368,10 +358,13 @@
             },
         /**---------------------------------------------转给他人--------------------------------------------- */
             //  打开弹框清空表单
-            showPopup3(){
+            showPopup2(){
                 this.staffName = ''
                 this.staffId = ''
                 this.checkBox1 = false
+                this.checkBox2 = false
+                this.checkBox3 = false
+                this.checkBox4 = false
             },
             //  确定转给他人
             turnSave(){
@@ -385,13 +378,16 @@
                     list: list,
                     ownerId: this.staffId,
                     ifLeft: this.checkBox1,
+                    turnClue: this.checkBox2,
+                    turnOpportunity: this.checkBox3,
                 }
-                this.$post("/crm/opportunityPR/turnOther", params, (data) => {
+                this.$post("/crm/partnerPR/turnOther", params, (data) => {
+                    this.popup2 = false
                     this.toastSuccess("转移成功！")
-                    this.popup3 = false
-                    this.goBack()
+                    this.$router.back(-1)
                 })
             },
+        /****************************************转给他人选择拥有者******************************************* */
             //  获取所员工
             getAllStaff(){
                 this.$post("/crm/getAllStaff", {}, (data) => {
@@ -421,7 +417,6 @@
                     this.staffId = item.id
                     this.popup1 = false
                 }
-                
             },
             getResult1 (val) {
                 this.results1 = val ? this.match1(val) : this.staffs
@@ -445,54 +440,47 @@
                 })
                 return rs
             },
-        /**---------------------------------------------关闭-------------------------------------- */
-            showPopup2(){
-                this.reason = ''
-            },
-            close(){
-                if(!this.reason){
-                    this.toastFail("请填写关闭原因", "160px")
-                    return;
-                }
-                let params = {
-                    closeOpportunity: {closeReason: this.reason}, 
-                    flag: "close", 
-                    id: this.query.id
-                }
-                this.$post("/crm/opportunityPR/updateOpportunity", params, (data) => {
-                    this.popup2 = false
-                    this.getBaseInfo()
-                })
-            },
         /**********************************************获取对应tab内容******************************** */
             //  获取客户字段
             getFieldList(){
                 if(!this.fieldList.length){
                     this.$vux.loading.show()
-                    this.$post("/crm/extFieldPR/getField", {tableName: 'crm_marketing_opportunity'}, (data) => {
+                    this.$post("/crm/extFieldPR/getField", {tableName: 'crm_partner'}, (data) => {
                         this.fieldList = data.list
+                        data.tableList.map((item) => {
+                            this.tableNameObj[item] = []
+                        })
+                        data.list.map((item) => {
+                            if(item.editorType == 'tableItem'){
+                                this.tableNameObj[item.dictName].push({
+                                    name: item.name,
+                                    label: item.label
+                                })
+                            }
+                        })
+                        console.log(this.tableNameObj)
                     })
                 }
             },
             //  获取联系人
             getContacts(){
                 this.$vux.loading.show()
-                this.$post("/crm/opportunityDetailPR/getContact", {id: this.query.id}, (data) => {
+                this.$post("/crm/contactsDetailPR/queryOtherContacts", {id: this.query.id}, (data) => {
                     this.contacts = data.list
                 })
             },
-            //  获取竞争对手
-            getCompetitors(){
+            //  获取线索
+            getClues(){
                 this.$vux.loading.show()
-                this.$post("/crm/opportunityDetailPR/queryCompetitor", {id: this.query.id}, (data) => {
-                    this.competitors = data.list
+                this.$post("/crm/partnerDetailPR/queryMarketingClueByPartnerId", {id: this.query.id}, (data) => {
+                    this.clues = data.list
                 })
             },
-            //  获取合同
-            getContracts(){
+            //  获取机会
+            getOpportunitys(){
                 this.$vux.loading.show()
-                this.$post("/crm/opportunityDetailPR/contractByOpportunityId", {id: this.query.id}, (data) => {
-                    this.contracts = data.list
+                this.$post("/crm/partnerDetailPR/queryOpportunityByPartnerId", {id: this.query.id}, (data) => {
+                    this.opportunitys = data.list
                 })
             },
             //  获取附件
@@ -522,6 +510,7 @@
                     }
                 })
             },
+            
         },
     }
 
@@ -531,6 +520,7 @@
     @baseColor: #16A4FA;
     .main{
         padding-top: 110px;
+        font-size: 12px;
         overflow: hidden;
         .vux-tab-wrap{
             z-index: 2;
@@ -638,9 +628,10 @@
         }
         .footer-subtab{
             position: absolute;
+            height: 72px;
             width: 100%;
             background: #fff;
-            bottom: 41px;
+            top: -74px;
             line-height: 36px;
             border-top: 1px solid #ddd;
         }
@@ -650,62 +641,31 @@
         overflow: auto;
         padding-bottom: 46px;
         box-sizing: border-box;
-        .vux-table{
+        .vux-table-default{
             margin-top: 15px;
             line-height: 20px;
-            &:after, td:before{
+            &:after, >tr>td:before{
                 display: none;
             }
-            td:first-of-type{
-                text-align: right;
-                padding: 0 10px 8px;
+            >tr>td:first-of-type{
+                text-align: left;
+                padding: 0 0 8px 20px;
                 vertical-align: text-top;
             }
-            td:last-of-type{
+            >tr>td:last-of-type{
                 text-align: left;
                 padding: 0 10px 8px;
             }
         }
         .contacts{
-            position: relative;
             padding: 8px 12px;
             border-bottom: 1px solid #ddd;
-            .img{
-                position: relative;
-                float: left;
-                i{
-                    position: absolute;
-                    top: 20px;
-                    right: 8px;
-                    display: block;
-                    color: #f00;
-                    font-size: 14px;
-                    background: #fff;
-                    height: 12px;
-                    width: 12px;
-                    border-radius: 50%;
-                    &:before{
-                        position: relative;
-                        top: -5px;
-                        left: -1px;
-                    }
-                }
-                img{
-                    margin-right: 8px;
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 50%;
-                    vertical-align: middle;
-                }
-            }
-            .edit{
-                position: absolute;
-                color: #ccc;
-                right: 10px;
-                top: 8px;
-                i{
-                    font-size: 24px;
-                }
+            img{
+                margin-right: 8px;
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                vertical-align: middle;
             }
         }
     }

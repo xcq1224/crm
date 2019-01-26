@@ -23,7 +23,7 @@
                     <span class="float_r font12">{{item.createTime.split(" ")[0]}}</span>
                 </p> 
                 <p>
-                    <span class="inline_block text-ellipsis w270">￥{{item.contracAmount}}&nbsp;&nbsp;{{item.customerName}}</span>
+                    <span class="inline_block text-ellipsis w270">{{item.contracAmount}}(万元)&nbsp;&nbsp;{{item.customerName}}</span>
                     <span class="float_r font12">{{item.contractState}}</span>
                 </p>
             </router-link>
@@ -113,7 +113,7 @@
                 value: '',
                 is_search: false,
                 currentPage: 1,
-                pageSize: 20,
+                pageSize: 2000,
                 tableData: []
             }
         },

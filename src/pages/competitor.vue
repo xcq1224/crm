@@ -2,9 +2,9 @@
     <div class="page"> 
         <div class="operating-box">
             <div class="operating-flex">
-                <div class="vux-1px-r" @click="chooseClassify">
+                <!-- <div class="vux-1px-r" @click="chooseClassify">
                     <span>{{ list1[value1].value }}<i class="iconfont icon-xia"></i></span>
-                </div>
+                </div> -->  
                 <div class="vux-1px-r filter" @click="showPopupPicker2 = true">
                     <span>筛选<i class="iconfont icon-xia"></i></span>
                 </div>
@@ -14,25 +14,25 @@
                 <div class="vux-1px-r icon" @click="search">
                     <span><i class="iconfont icon-chaxun"></i></span>
                 </div>
-                <router-link class="icon" to="./clue_add?handleType=0">
+                <router-link class="icon" to="./competitor_add?handleType=0">
                     <span><i class="iconfont icon-add1"></i></span>
                 </router-link>
             </div>
         </div>
         <div class="main">
-            <router-link :to="'./clue_detail?id=' + item.id" class="list-item" v-for="(item, index) in tableData" :key="index">
+            <router-link :to="'./competitor_detail?id=' + item.id" class="list-item" v-for="(item, index) in tableData" :key="index">
                 <p>
                     <span  class="inline_block text-ellipsis w270 text_333">{{item.name}}</span>
-                    <span class="float_r font12">{{item.marketingClueState}}</span>
+                    <span class="float_r font12">{{item.createTime.split(" ")[0]}}</span>
                 </p> 
-                <p><span class="inline_block w_100 text-ellipsis">{{item.customerName}}</span></p>
+                <p><span class="inline_block w_100 text-ellipsis">{{item.power}}</span></p>
             </router-link>
         </div>
         <search
             v-show="is_search"
             @on-submit="getTableData(1)"
             v-model="value"
-            placeholder="请输入线索名称"
+            placeholder="请输入竞争对手名称"    
             @on-cancel="onCancel"
             ref="search" style="position:absolute;top:0;">
         </search>
@@ -48,7 +48,7 @@
     import { Divider } from 'vux'
     import { Tab, TabItem, Sticky, XButton, Swiper, SwiperItem } from 'vux'
     import { Card } from 'vux'
-    import { PopupPicker, PopupRadio } from 'vux'
+    import { PopupPicker, PopupRadio  } from 'vux'
     import { Search } from 'vux'
     import { setTimeout } from 'timers';
 
@@ -85,44 +85,16 @@
                         value: '我参与的',
                         key: 2
                 }],
-                value2: ['marketingClueState', ''],
+                value2: ['type', ''],
                 showPopupPicker2: false,
                 list2: [{
-                        name: '线索状态',
-                        value: 'marketingClueState',
-                        parent: 0
-                    }, {
-                        name: '跟进状态',
-                        value: 'state',
-                        parent: 0
-                    }, {
-                        name: '线索来源',
-                        value: 'type',
+                        name: '竞争力',
+                        value: 'power',
                         parent: 0
                     }, {
                         name: '请选择',
                         value: '',
-                        parent: 'marketingClueState'
-                    }, {
-                        name: '进行中',
-                        value: '0',
-                        parent: 'marketingClueState'
-                    }, {
-                        name: '已转化',
-                        value: '1',
-                        parent: 'marketingClueState'
-                    }, {
-                        name: '已关闭',
-                        value: '2',
-                        parent: 'marketingClueState'
-                    }, {
-                        name: '请选择',
-                        value: '',
-                        parent: 'state'
-                    }, {
-                        name: '请选择',
-                        value: '',
-                        parent: 'type'
+                        parent: 'power'
                 }],
                 value3: ['createTime', '-1'],
                 showPopupPicker3: false,
@@ -131,11 +103,7 @@
                         value: 'createTime',
                         parent: 0
                     }, {
-                        name: '跟进时间',
-                        value: 'lastFollowTime',
-                        parent: 0
-                    }, {
-                        name: '线索名称',
+                        name: '竞争对手名称',
                         value: 'name',
                         parent: 0
                     }, {
@@ -146,14 +114,6 @@
                         name: '降序',
                         value: '-1',
                         parent: 'createTime'
-                    }, {
-                        name: '升序',
-                        value: '1',
-                        parent: 'lastFollowTime'
-                    }, {
-                        name: '降序',
-                        value: '-1',
-                        parent: 'lastFollowTime'
                     }, {
                         name: '升序',
                         value: '1',
@@ -172,31 +132,24 @@
         },
         mounted() {
             //  获取数据字典
-            let list = ["crm-xs-gjzt", "crm-xsly"]
+            let list = ["crm-jzl"]
             this.$post("/crm/getDict", {"list": list}, (data) => {
-                data['crm-xs-gjzt'].map((item, index) => {
+                data['crm-jzl'].map((item, index) => {
                     this.list2.push({ 
                             name: item,
                             value: item,
-                            parent: 'state'
-                    })
-                })
-                data['crm-xsly'].map((item, index) => {
-                    this.list2.push({ 
-                            name: item,
-                            value: item,
-                            parent: 'type'
+                            parent: 'power'
                     })
                 })
             })
         },
         activated(){
-            this.value2 = ['state', '']
+            this.value2 = ['type', '']
             this.value3 = ['createTime', '-1']
             this.getTableData(1)
         },
         methods: {
-            onChange1(val){
+            onChange1(){
                 this.getTableData(1)
             },
             onChange2(){
@@ -206,7 +159,7 @@
                 this.getTableData(1)
             },
 
-            //  获取线索
+            //  获取客户
             getTableData(val){
                 this.currentPage = val
                 let params = {
@@ -219,7 +172,7 @@
                 params.classify = this.value1.toString()
                 params[this.value2[0]] = this.value2[1]
                 this.$vux.loading.show()
-                this.$post("/crm/marketingCluePR/queryMarketingClue", params, (data) => {
+                this.$post("/crm/competitorPR/getAll", params, (data) => {
                     this.tableData = data.list;
                     this.is_search = false
                     this.value = ''

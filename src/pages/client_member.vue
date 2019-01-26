@@ -1,14 +1,19 @@
 <template>
     <div class="page"> 
         <div class="main" :style="isOwner ? 'padding-bottom: 40px' : ''">
+            <x-switch v-if="isOwner" @on-change="changePublic" title="<i class='iconfont icon-gongkai'></i> 公开查看" v-model="isPublic" style="margin-bottom: 20px;background: #fff;"></x-switch>
             <swipeout>
                 <swipeout-item transition-mode="follow" :disabled="item.isOwner || !isOwner" v-for="(item, index) in memberList" :key="index">
                     <div slot="right-menu">
                     <swipeout-button type="warn" @click.native="deleteMember(item.id, index)">删除</swipeout-button>
                     </div>
                     <div slot="content" class="item">
-                        <span :class="item.isOwner ? 'admin' : ''"><img src="../assets/avatar.jpg" alt=""><i v-if="item.isOwner" class="iconfont icon-geren"></i></span>
-                        <span>{{item.userCname}}</span>
+                        <span :class="item.isOwner ? 'admin avatar' : 'avatar'">
+                            <img v-if="item.avatar" :src="item.avatar" alt="">
+                            <font v-else class="iconfont icon-morentouxiang"></font>
+                            <i v-if="item.isOwner" class="iconfont icon-geren"></i>
+                        </span>
+                        <span class="username">{{item.userCname}}</span>
                         <div class="float_r" style="margin-top: 6px;" v-if="isOwner & !item.isOwner">
                             <check-icon :value.sync="item.isModify" @click.native="updateMember(item.isModify, index, item.id, 'isModify')"><span class="text_777 float_r">编辑</span></check-icon>
                             <check-icon :value.sync="item.isDownload" @click.native="updateMember(item.isDownload, index, item.id, 'isDownload')"><span class="text_777">下载附件</span></check-icon>
@@ -42,7 +47,7 @@
 <script>
 
     import { XHeader, Actionsheet, TransferDom, ButtonTab, ButtonTabItem, PopupPicker, Search, CheckIcon, Popup,
-            Swipeout, SwipeoutItem, SwipeoutButton } from 'vux'
+            Swipeout, SwipeoutItem, SwipeoutButton, XSwitch } from 'vux'
 
     export default {
         components: {
@@ -57,6 +62,7 @@
             Swipeout, 
             SwipeoutItem, 
             SwipeoutButton,
+            XSwitch,
         },
         data () {
             return {
@@ -68,10 +74,12 @@
                 results1: [],                           //  搜索结果
                 staffs: [],
                 searchValue1: '',                       //  搜索文本
+                isPublic: true,                         
             }
         },
         activated(){
             this.query = this.$router.currentRoute.query
+            this.isPublic = this.query.isPublic == '1'
             this.getAllStaff()
             this.getMembers()
             
@@ -87,7 +95,7 @@
                     this.memberList = data.list
                     this.isOwner = data.isOwner
                 })
-            },
+            },              
             //  获取所员工
             getAllStaff(){
                 this.$post("/crm/getAllStaff", {}, (data) => {
@@ -178,6 +186,16 @@
                 })
                 return rs
             },
+            //  修改是否公开
+            changePublic () {
+                let params = {
+                    id: this.query.id,
+                    moduleName: this.query.moduleName,
+                    isPublic: this.isPublic ? '1' : '0',
+                }
+                this.$post("/crm/memberPR/changePublic", params, (data) => {
+                })
+            },
         },
     }
 </script>
@@ -194,18 +212,30 @@
             padding: 5px 15px 0;
             box-sizing: border-box;
             img{
+                position: relative;
+                top: 10px;
                 width: 36px;
                 height: 36px;
                 border-radius: 50%;
+                vertical-align: sub;
+                margin-right: 5px;
+            }
+            font{
+                font-size: 36px;
+                color: @baseColor;
                 vertical-align: middle;
                 margin-right: 5px;
+            }
+            .avatar{
+                position: relative;
+                top: -10px;
             }
             .admin{
                 position: relative;
                 i{
                     position: absolute;
                     top: 15px;
-                    right: 5px;
+                    right: 6px;
                     display: block;
                     color: #f00;
                     font-size: 14px;
@@ -224,6 +254,10 @@
                 float: right;
                 line-height: 36px;
                 color: #ccc;
+            }
+            .username{
+                position: relative;
+                top: -10px;
             }
         }
     }
@@ -249,6 +283,21 @@
         }
     }
 </style>
+<style lang="less">
+    .weui-switch, .weui-switch-cp__box{
+        width: 44px !important;
+    }
+    .vux-x-switch .weui-label{
+        width: auto !important;
+    }
+    .weui-switch:before, .weui-switch-cp__box:before{
+        width: 42px !important;
+    }
+    .vux-check-icon > .weui-icon-success:before, .vux-check-icon > .weui-icon-success-circle:before{
+        color: #16A4FA !important;
+    }
+</style>
+
 
 
 

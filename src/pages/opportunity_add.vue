@@ -288,8 +288,9 @@
                     this.toastFail("请输入机会名称", "160px")
                     return;
                 }
-                if(!this.formAdd.amount){
-                    this.toastFail("请输入预计营销额")
+                let reg = /(^[1-9]([0-9]+)?(\.[0-9]{1,4})?$)|(^(0){1}$)|(^[0-9]\.[0-9]{1,4}?$)/;
+                if(!reg.test(this.formAdd.amount)){
+                    this.toastFail("请输入预计营销额(最多四位小数)", "260px")
                     return;
                 }
                 if(!this.formAdd.ownerCname){

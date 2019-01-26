@@ -142,10 +142,10 @@
         },
         activated(){
             this.query = this.$router.currentRoute.query
-            this.date = this.formatDate(new Date(), "yyyy-MM-dd")
-            this.week = this.getWeek()
+            this.date = this.query.date
+            this.week = this.getWeek(new Date(this.date))
             this.month = this.formatDate(new Date(), "yyyy-MM")
-            this.tabIndex = -1
+            this.tabIndex = parseInt(this.query.type)
             this.isEdit = false
             this.$vux.loading.show()
             this.getWorkReport()
@@ -158,13 +158,11 @@
                     this.workReviews = data.workReviews
                     document.title = this.workReport.createUserName + '的' + this.workReport.reportType
                     this.isOwner = data.isOwner
-                    this.tabIndex = this.list.indexOf(data.workReport.reportType)
                     this.getVisit()
                 })
             },
             //  获取当前周
-            getWeek(){
-                let date = new Date()
+            getWeek(date){
                 let day = date.getDay()
                 let startDate = new Date()
                 let endDate = new Date()
@@ -241,7 +239,7 @@
                 }else if(this.tabIndex == 1){
                     visitTime = [this.week.split("~")[0], this.week.split("~")[1]]
                 }else if(this.tabIndex == 2){
-                    visitTime = this.getMonthtDate(new Date())
+                    visitTime = this.getMonthtDate(new Date(this.date))
                 }
                 this.$post("/crm/visitPR/queryAll", {visitTime: visitTime, isOwner: true}, (data) => {
                     this["signList" + this.tabIndex] = data.list

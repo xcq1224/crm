@@ -1,10 +1,10 @@
 <template>
     <div class="page"> 
         <div class="main">
-            <group v-for="(item, index) in planList" :key="index" gutter='0' label-width="100px">
+            <group v-for="(item, index) in planList" :key="index" gutter='0' label-width="160px">
                 <div class="title" slot="title">第{{index+1}}期收款计划<i class="iconfont icon-shanchu" @click="del(index)"></i></div>
                 <datetime title="计划收款日期" format="YYYY-MM-DD" v-model="item.planReceiptTime"></datetime>
-                <x-input title="计划收款金额" v-model="item.planPaymentAmount"></x-input>
+                <x-input title="计划收款金额(万元)" v-model="item.planPaymentAmount"></x-input>
                 <x-textarea :max="200" placeholder="备注" v-model="item.remark"></x-textarea>
             </group>
             <div class="btn-add" @click="addPlan">添加收款期数</div>
@@ -84,9 +84,14 @@
                 receiptList.some((item, index) => {
                     item.receiptNum = (index + 1).toString()
                     item.receiptstate = item.receiptstate || "未完成"
-                    if(!(item.planReceiptTime && item.planPaymentAmount)){
-                        msg = '计划收款日期和金额不能为空'
+                    if(!item.planReceiptTime){
+                        msg = '请选择计划收款日期'
                         return true
+                    }
+                    let reg = /(^[1-9]([0-9]+)?(\.[0-9]{1,4})?$)|(^(0){1}$)|(^[0-9]\.[0-9]{1,4}?$)/;
+                    if(!reg.test(item.planPaymentAmount)){
+                        msg = "请输入计划收款金额(最多四位小数)"
+                        return;
                     }
                     amount += parseInt(item.planPaymentAmount)
                     if(amount > this.contractAmount){

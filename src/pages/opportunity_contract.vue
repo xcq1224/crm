@@ -7,7 +7,7 @@
                         <div slot="label" style="width: 100px;"><span v-if="requiredList.indexOf(item.name) != -1" style="color: red;">* </span>{{item.label}}</div>
                     </x-textarea>
                     <selector v-model="formAdd[item.name]" direction="rtl" v-if="item.editorType == 'dict'" placeholder="请选择" :title="item.label" :options="item.selectList"></selector>
-                    <datetime v-model="formAdd[item.name]" format="YYYY-MM-DD HH:mm" v-if="item.editorType == 'date'" :title="item.label">
+                    <datetime v-model="formAdd[item.name]" format="YYYY-MM-DD" v-if="item.editorType == 'date'" :title="item.label">
                         <div slot="title"><span v-if="requiredList.indexOf(item.name) != -1" style="color: red;">* </span>{{item.label}}</div>
                     </datetime>
                 </template>
@@ -19,6 +19,9 @@
                 </x-textarea>
                 <cell is-link v-model="formAdd.selfSignatory" @click.native="popup4 = true">
                     <div slot="title">我方签约人</div>
+                </cell>
+                <cell is-link v-model="formAdd.businessManagerName" @click.native="popup6 = true">
+                    <div slot="title"><span style="color: red;">* </span>经营经理</div>
                 </cell>
                 <cell is-link v-model="formAdd.ownerCname" @click.native="popup3 = true">
                     <div slot="title"><span style="color: red;">* </span>合同负责人</div>
@@ -58,7 +61,7 @@
                 </search>
             </div>
         </popup>
-        <!-- 添加拥有者 -->
+        <!-- 添加财务经理 -->
         <popup v-model="popup5" @on-show="showPopup5" height="100%">
             <div class="popup0">
                 <search
@@ -71,6 +74,22 @@
                     top="0"
                     @on-cancel="onCancel5"
                     ref="search5">
+                </search>
+            </div>
+        </popup>
+        <!-- 添加经营经理 -->
+        <popup v-model="popup6" @on-show="showPopup6" height="100%">
+            <div class="popup0">
+                <search
+                    @result-click="resultClick6"
+                    @on-change="getResult6"
+                    :results="results6"
+                    v-model="searchValue6"
+                    position="absolute"
+                    auto-scroll-to-top
+                    top="0"
+                    @on-cancel="onCancel6"
+                    ref="search6">
                 </search>
             </div>
         </popup>
@@ -125,6 +144,11 @@
                 results5: [],                        //  搜索结果
                 financialManagers: [],
                 searchValue5: '',                    //  搜索文本
+
+                //  经营经理
+                popup6: false,
+                results6: [],                        //  搜索结果
+                searchValue6: '',                    //  搜索文本
             }
         },
         mounted(){
@@ -167,6 +191,7 @@
                     })
                     this.results3 = this.deepClone(this.staffs)
                     this.results4 = this.deepClone(this.staffs)
+                    this.results6 = this.deepClone(this.staffs)
                 })   
             },
             //  保存
@@ -185,6 +210,10 @@
                 }
                 if(!this.formAdd.financialManagerName){
                     this.toastFail("请选择财务经理", "160px")
+                    return;
+                }
+                if(!this.formAdd.businessManagerName){
+                    this.toastFail("请选择经营经理", "160px")
                     return;
                 }
                 if(!this.formAdd.ownerCname){
@@ -323,6 +352,45 @@
             match5(val){
                 let rs = []
                 this.financialManagers.map((item) => {
+                    if(item.title.indexOf(val) != -1){
+                        rs.push(item)
+                    }
+                })
+                return rs
+            },
+        /************************************添加经营经理****************************** */
+            showPopup6(){
+                setTimeout(() => {
+                    this.$refs.search6.setFocus()
+                    setTimeout(() => {
+                        this.$refs.search6.setBlur()
+                    }, 0);
+                }, 0);
+            },
+
+            resultClick6 (item) {
+                if(item.id){
+                    this.formAdd.businessManagerId = item.id
+                    this.formAdd.businessManagerName = item.name
+                    this.popup6 = false
+                }
+            },
+            getResult6 (val) {
+                this.results6 = val ? this.match6(val) : this.staffs
+                if(!this.results6.length){
+                    this.results6 = [{
+                        id: '',
+                        name: '',
+                        title: '暂无数据'
+                    }]
+                }
+            },
+            onCancel6 () {
+                this.popup6 = false
+            },
+            match6(val){
+                let rs = []
+                this.staffs.map((item) => {
                     if(item.title.indexOf(val) != -1){
                         rs.push(item)
                     }

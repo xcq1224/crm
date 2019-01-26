@@ -21,6 +21,9 @@ import "./js/geolocation.min"
 //   }
 // })
 
+import wx from 'weixin-js-sdk'
+Vue.prototype.wx = wx
+
 FastClick.attach(document.body)
 
 Vue.config.productionTip = false
@@ -39,8 +42,8 @@ Vue.prototype.$axios = axios
  * @param {请求失败回调} error 
  */
 Vue.prototype.$post = function(action, params, success, error) {
-  // let url = '/pm' + action
-  let url = 'http://localhost:8085/pm' + action
+  let url = '/pm' + action
+  // let url = 'http://localhost:8085/pm' + action
   this.$axios.post(url,params).then(res => {
     this.$vux.loading.hide()
     if(res.data.flag){
@@ -150,6 +153,21 @@ Vue.prototype.deepClone = function(initalObj) {
   var obj = {};
   obj = JSON.parse(JSON.stringify(initalObj));
   return obj;
+}
+
+/**
+ * ios 将2018-01-01 转成 时间格式
+ */
+Vue.prototype.iosDate = function(str, fmt) {
+  if(!str){
+    return ''
+  }
+  let str1 = str.split(".")[0]
+  let str2 = str1.replace(/-/g,'/').replace(/T/g,' ');
+  let t1 = Date.parse(new Date(str2));
+  let t2 = t1 + 8*60*60*1000
+  let date = this.formatDate(new Date(t2), fmt)
+  return date;
 }
 
 /**

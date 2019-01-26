@@ -3,7 +3,14 @@
         <div class="main">
             <!-- 新增和编辑 -->
             <group gutter='0' label-width="120px" v-if="query.handleType != 2">
-                <div>
+                <div class="weui-cell">
+                    <span style="display: inline-block; width:100px;">照片</span>
+                    <div class="img-box" :style="'backgroundImage: url(' + imgUrl() + ')'">
+                        <i v-show="!(imgSrc || formAdd.avatarPath)" class="iconfont icon-add1"></i>
+                        <input ref="uploadPicture" @change="uploadPicture" type="file" accept="image/*">  
+                    </div>
+                </div>
+                <div style="position: relative;">
                     <span style="color: red;position: absolute; top: 16px; left: 16px; font-size: 13px;">*</span><selector v-model="relation" title="&nbsp;&nbsp;与联系人关系" placeholder="请选择" :options="relationList"></selector>
                 </div>
                 <template v-for="item in addLabel">
@@ -22,6 +29,10 @@
             </group>
             <!-- 查看 -->
             <group gutter='0' label-width="100px" v-if="query.handleType == 2">
+                <div class="weui-cell">
+                    <span style="display: inline-block; width:100px;">照片</span>
+                    <div class="img-box" :style="'backgroundImage: url(' + imgUrl() + ')'"></div>
+                </div>
                 <cell title="与联系人关系" :value="relation"></cell>
                 <cell v-for="(item, index) in addLabel" :key="index" :title="item.label" :value="formAdd[item.name]"></cell>
                 <div class="tag-box">
@@ -78,7 +89,7 @@
                 tagValue: '',
                 popup0: false,
 
-
+                imgSrc: '',
 
 
                 formAdd: {tags: []},
@@ -98,6 +109,7 @@
             this.formAdd = {tags: []}
             this.relation = ''
             this.addLabel = []
+            this.imgSrc = ""
             this.query = this.$router.currentRoute.query
             document.title = this.titleList[this.query.handleType]
             this.$post("/crm/extFieldPR/getField", {tableName: 'crm_contacts'}, (data) => {
@@ -116,6 +128,18 @@
             }
         },
         methods: {
+        /************************************添加照片********************************* */
+            uploadPicture(e){
+                if(e.target.files.length) this.imgSrc = e.target.files[0]
+                e.target.value = ''
+            },
+            //  将文件流转化为url
+            getUrl(file){
+                return file ? URL.createObjectURL(file) : null
+            },
+            imgUrl(){
+                return this.imgSrc ? this.getUrl(this.imgSrc) : this.formAdd.avatarPath
+            },
             getDict(){
                 let list = ["crm-lxrgx"]
                 this.$post("/crm/getDict", {"list": list}, (data) => {
@@ -150,8 +174,8 @@
                     return;
                 }
                 let params = new FormData()
+                params.append("avatar", this.imgSrc)
                 if(this.query.handleType == '0'){
-                    let params = new FormData()
                     // params.append('avatar', this.relationImgSrc)
                     //  当前联系人id
                     params.append('id', this.query.aId)    
@@ -162,7 +186,6 @@
                         this.goBack()
                     })
                 }else{
-                    let params = new FormData()
                     params.append("relation", this.relation)
                     params.append("relationShipId", this.relationShipId)
                     params.append("contact_str", JSON.stringify(this.formAdd))
@@ -212,6 +235,29 @@
                 color: #fff;    
                 background: @baseColor;
             }
+        }
+    }
+    .img-box{
+        width: 60px;
+        height: 60px;
+        border: 1px solid #ddd;
+        text-align: center;
+        position: relative;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        i{
+            font-size: 40px;
+            color: #ccc;
+            line-height: 62px;
+        }
+        input{
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
         }
     }
 </style>

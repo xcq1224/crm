@@ -5,7 +5,7 @@
                 <x-textarea v-model="formAdd.visitContent" :height="120" class="textarea" placeholder="请填写拜访内容..."></x-textarea>
             </group>
             <group>
-                <cell v-show="formAdd.visitAddress" title="签到地点" v-model="formAdd.visitAddress"></cell>
+                <cell v-show="formAdd.visitAddress" title="签到地点" v-model="formAdd.visitAddress" @click.native="geolocation"></cell>
                 <cell v-show="!formAdd.visitAddress" title="签到地点">
                     <div slot="" class="text_base" @click="geolocation">获取当前位置</div>
                 </cell>
@@ -38,6 +38,8 @@
 <script>
     import { XHeader, Actionsheet, TransferDom, ButtonTab, ButtonTabItem } from 'vux'
     import { Cell, CellBox, CellFormPreview, Group, InlineXSwitch, XTextarea, XInput, Datetime, Popup, PopupRadio, Search } from 'vux'
+    import { POINT_CONVERSION_COMPRESSED } from 'constants';
+    import jsonp from 'jsonp';
 
     export default {
         components: {
@@ -143,33 +145,31 @@
                     this.goBack()
                 })
             },
+        
         /***************************************获取定位*********************************** */
             geolocation(){
                 this.$vux.loading.show({
                     text: '定位中...'
                 })
-                var geolocation = new qq.maps.Geolocation("OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-WPB77", "myapp")
+                var geolocation = new qq.maps.Geolocation("HPABZ-Z6KAQ-MZF5Q-GBJDK-25QXQ-DUBGP", "crmapp")
                 geolocation.getLocation(this.showPosition, this.showErr, this.options)
             },
             showPosition(position) {
-                var latlon = position.lat + "," + position.lng;
-                var url = 'http://maps.google.cn/maps/api/geocode/json?latlng='+latlon+'&language=CN';
-                this.$axios({
-                    method:"GET",
-                    url:url,
-                    withCredentials: false,
-                }).then(json => {
-                    this.$vux.loading.hide()
-                    if(json.data.status=='OK'){
-                        this.formAdd.visitAddress = json.data.results[0].formatted_address;
-                    }else{
-                        this.toastFail("定位失败")
-                    }
-                }).catch(res=>{
+                let latlon = position.lat + "," + position.lng
+                var url = "http://apis.map.qq.com/ws/geocoder/v1/?key=HPABZ-Z6KAQ-MZF5Q-GBJDK-25QXQ-DUBGP&jsonpCallback=QQmap&location="+latlon+"&output=jsonp&get_poi=0";
+                jsonp(url, null, (err, data) => {
+                    if (err) {
                         this.$vux.loading.hide()
                         this.toastFail('网络异常，请稍后再试', '200px')
+                    } else {
+                        this.$vux.loading.hide()
+                        if(data.result && data.result.address){
+                            this.formAdd.visitAddress = data.result.address;
+                        }else{
+                            this.toastFail("定位失败")
+                        }
                     }
-                )
+                })
             },
             showErr(){
                 this.toastFail("定位失败")
@@ -216,7 +216,6 @@
             },
         },
     }
-
 </script>
 
 <style lang="less" scoped>

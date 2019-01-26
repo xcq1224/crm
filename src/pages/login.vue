@@ -24,9 +24,11 @@
                 username: '',
                 password: '',
                 isShow: false,
+                query: {},
             }
         },
         created(){
+            this.query = this.$router.currentRoute.query
             if(this.getCookie('crmUserName')){
                 this.$vux.loading.show()
                 this.$axios({
@@ -83,7 +85,7 @@
                 this.$axios({
                     method:"POST",
                     url: "/pm/api/saasLogin",
-                    data : {userId: this.username, pwd: this.password},
+                    data : {userId: this.username, pwd: this.password, code: this.query.code},
                 }).then(r => {
         			if (r.data.flag == 'Y') {
                         console.log(r)

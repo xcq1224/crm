@@ -13,7 +13,7 @@
                 <selector v-model="formAdd.followType" title="跟进方式" placeholder="请选择" :options="gjfs"></selector>
             </group>
             <group>
-                <cell v-model="query.name" title="客户名称"></cell>
+                <cell v-model="query.name" title="合作伙伴"></cell>
                 <selector v-model="formAdd.followStatus" title="跟进状态" placeholder="请选择" :options="gjzt"></selector>
                 <cell is-link v-model="formAdd.contactCname" title="拜访人员" @click.native="popup1 = true"></cell>
                 <cell is-link v-model="formAdd.copyToUserCname" title="通知人" @click.native="popup2 = true"></cell>
@@ -106,7 +106,7 @@
             this.query = this.$router.currentRoute.query
             this.formAdd = {
                 parentId: this.query.id,
-                moduleName: 'crm_customer',
+                moduleName: 'crm_partner',
                 followTime: this.formatDate(new Date(), "yyyy-MM-dd hh:mm"),
                 followContent: ''
             }

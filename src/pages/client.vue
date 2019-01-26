@@ -146,7 +146,7 @@
                 value: '',
                 is_search: false,
                 currentPage: 1,
-                pageSize: 200,
+                pageSize: 2000,
                 tableData: []
             }
         },

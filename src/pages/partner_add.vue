@@ -3,7 +3,7 @@
         <div class="main">
             <group gutter='0' label-width="100px">
                 <template v-for="item in addLabel">
-                    <x-textarea v-model="formAdd[item.name]" :height="20" :rows='1' :autosize="true" v-if="item.editorType == 'text' && item.name != 'no' && ['taxNo', 'companyAddress', 'companyPhone', 'openBank', 'openAccount'].indexOf(item.name) == -1">
+                    <x-textarea v-model="formAdd[item.name]" :height="20" :rows='1' :autosize="true" v-if="item.editorType == 'text' && item.name != 'no'">
                         <div slot="label" style="width: 100px;"><span v-if="requiredList.indexOf(item.name) != -1" style="color: red;">* </span>{{item.label}}</div>
                     </x-textarea>
                     <cell @click.native="showPopupPicker = true" v-if="item.editorType == 'cascade'" :title="item.label" :value="areaStr"></cell>
@@ -13,11 +13,6 @@
                 <cell v-if="query.handleType != '1'" is-link v-model="formAdd.ownerCname" @click.native="popup1 = true">
                     <div slot="title"><span style="color: red;">* </span>拥有者</div>
                 </cell>
-                <template v-for="item in addLabel" v-if="['taxNo', 'companyAddress', 'companyPhone', 'openBank', 'openAccount'].indexOf(item.name) != -1">
-                    <x-textarea v-model="formAdd[item.name]" :height="20" :rows='1' :autosize="true" v-if="item.editorType == 'text' && item.name != 'no'">
-                        <div slot="label" style="width: 100px;"><span v-if="requiredList.indexOf(item.name) != -1" style="color: red;">* </span>{{item.label}}</div>
-                    </x-textarea>
-                </template>
             </group>
         </div>
         <div class="footer">
@@ -82,7 +77,7 @@
                 query: {},        // handleType  '0' 新增    '1' 编辑
 
                 formAdd: {area: []},
-                requiredList: ["name"],             //  必填字段
+                requiredList: ["name", "phone"],             //  必填字段
                 addLabel: [],
 
                 area:[],
@@ -101,14 +96,14 @@
             this.formAdd = {area: []}
             this.query = this.$router.currentRoute.query
             if(this.query.handleType == '1'){
-                document.title = '编辑客户'
+                document.title = '编辑合作伙伴'
             }
-            this.$post("/crm/extFieldPR/getField", {tableName: 'crm_customer'}, (data) => {
+            this.$post("/crm/extFieldPR/getField", {tableName: 'crm_partner'}, (data) => {
                 this.addLabel = data.list;
             })
             if(this.query.id){
-                this.$post("/crm/customerDetailPR/queryCrmCustomerForOne", {id: this.query.id}, (data) => {
-                    this.formAdd = data.customer
+                this.$post("/crm/partnerDetailPR/queryPartnerForOne", {id: this.query.id}, (data) => {
+                    this.formAdd = data.basicInfo
                     this.areaStr = this.formAdd.area.join('/')
                 })
             }else{
@@ -172,7 +167,11 @@
         /************************************添加****************************** */
             save(){
                 if(!this.formAdd.name){
-                    this.toastFail("请输入客户名称", "160px")
+                    this.toastFail("请输入合作伙伴名称", "160px")
+                    return;
+                }
+                if(!this.formAdd.phone){
+                    this.toastFail("请输入合作伙伴电话", "160px")
                     return;
                 }
                 if(!this.formAdd.ownerCname){
@@ -180,12 +179,12 @@
                     return;
                 }
                 if(this.query.handleType == '0'){
-                    this.$post("/crm/customerPR/addCrmCustomer", this.formAdd, (data) => {
+                    this.$post("/crm/partnerPR/addOne", this.formAdd, (data) => {
                         this.toastSuccess("添加成功")
                         this.goBack()
                     })
                 }else{
-                    this.$post("/crm/customerPR/updateCrmCustomer", this.formAdd, (data) => {
+                    this.$post("/crm/partnerPR/modifyOne", this.formAdd, (data) => {
                         this.toastSuccess("修改成功")
                         this.goBack()
                     })

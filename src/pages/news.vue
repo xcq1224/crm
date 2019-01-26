@@ -4,19 +4,19 @@
             <group gutter='0'>
                 <cell class="cell" is-link link="./notice">
                     <span class="icon" slot="icon"><i class="iconfont icon-xiaoxi" style="background: #6ccac9;"></i></span>
-                    <div class="title" slot="title">通知</div>
-                    <badge class="num" text="88" slot=""></badge>
+                    <div class="title" slot="title">系统消息</div>
+                    <badge v-show="notifyNum" class="num" :text="notifyNum" slot=""></badge>
                 </cell>
-                <cell class="cell" is-link link="./notice">
+                <cell class="cell" is-link link="./letter">
                     <span class="icon" slot="icon"><i class="iconfont icon-yijianfankui" style="background: #1991eb;"></i></span>
                     <div class="title" slot="title">站内信</div>
-                    <badge class="num" text="888" slot=""></badge>
+                    <badge v-show="letterNum" class="num" :text="letterNum" slot=""></badge>
                 </cell>
-                <cell class="cell" is-link link="./approval">
+                <!-- <cell class="cell" is-link link="./approval">
                     <span class="icon" slot="icon"><i class="iconfont icon-shenpi" style="background: #a9d96c;"></i></span>
                     <div class="title" slot="title">待办事项</div>
-                    <badge class="num" text="8" slot=""></badge>
-                </cell>
+                    <badge class="num" text="0" slot=""></badge>
+                </cell> -->
             </group>
         </div>
     </div>
@@ -37,17 +37,74 @@
             Cell,
             CellFormPreview,
             CellBox,
-            Badge,
+            Badge,  
         },
         data () {
             return {
-                tabIndex: 0,
+                notifyNum: 0,
+                letterNum: 0,
+                isLogin: false,
+            }
+        },
+        created(){
+            this.query = this.$router.currentRoute.query
+            if(this.query.state == 'qywx'){
+                this.$store.state.wxType = "qywx"
+                this.$vux.loading.show()
+                this.$post("/crm/wechatPR/getQywxUserId", {code: this.query.code}, (data) => {
+                    console.log(data)
+                    this.$axios({
+                        method:"POST",
+                        url: "/pm/api/saasLogin",
+                        data : {userId: data.userId, pwd: data.pwd},
+                    }).then(r => {
+                        if (r.data.flag == 'Y') {
+                            console.log(r)
+                            var params = new URLSearchParams();
+                            params.append("organization", r.data.orgId)
+                            params.append("username", r.data.userId)
+                            params.append("password", r.data.pwd)
+                            this.$axios({
+                                method:"POST",
+                                url: "/pm/com.wisdri.iims.main.Login.d",
+                                data : params,
+                            }).then(data => {
+                                this.isLogin = true
+                            }).catch(res=>{
+                            })
+                        }
+                    })
+                })
+            }else{
+                this.isLogin = true
+                this.$store.state.wxType = ""
             }
         },
         activated(){
+            if(this.isLogin){
+                this.getNotify()
+                this.getMail()
+            }
         },
         methods: {
-
+            getNotify(){
+                this.$post("/api/NotifyPR/getNotify", {}, (data) => {
+                    data.list.some((item, index) => {
+                        if(item.state == '1'){
+                            this.notifyNum = index
+                            if(this.notifyNum > 99){
+                                this.notifyNum = 99
+                            }
+                            return true
+                        }
+                    })
+                })
+            },
+            getMail(){
+                this.$post("/api/IimsMailPR/getUnread", {}, (data) => {
+                    this.letterNum = data.num > 99 ? 99 : data.num
+                })
+            },
         },
     }
 

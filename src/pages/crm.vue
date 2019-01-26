@@ -1,15 +1,34 @@
 <template>
     <div class="has-tabbar page"> 
         <div class="main">
+            <p class="title">客户管理</p>
+            <div class="flex-box">
+                <router-link class="flex-item" to="./client">
+                    <i class="iconfont icon-kehu"></i>
+                    <p>营销客户</p>
+                </router-link>
+                <!-- <router-link class="flex-item" to="./clue">
+                    <i class="iconfont icon-kehuguanli"></i>
+                    <p>公海客户</p>
+                </router-link> -->
+                <router-link class="flex-item" to="./contacts">
+                    <i class="iconfont icon-icon--"></i>
+                    <p>客户联系人</p>
+                </router-link>
+                <router-link class="flex-item" to="./partner">
+                    <i class="iconfont icon-hezuohuoban"></i>
+                    <p>合作伙伴</p>
+                </router-link>
+                <router-link class="flex-item" to="./competitor">
+                    <i class="iconfont icon-shichangjingzheng-1"></i>
+                    <p>竞争对手</p>
+                </router-link>
+            </div>
             <p class="title">营销管理</p>
             <div class="flex-box">
                 <router-link class="flex-item" to="./clue">
                     <i class="iconfont icon-hailiangxiansuo"></i>
                     <p>营销线索</p>
-                </router-link>
-                <router-link class="flex-item" to="./client">
-                    <i class="iconfont icon-kehu"></i>
-                    <p>营销客户</p>
                 </router-link>
                 <router-link class="flex-item" to="./opportunity">
                     <i class="iconfont icon-shangji"></i>
@@ -19,21 +38,6 @@
                     <i class="iconfont icon-hetong2"></i>
                     <p>营销合同</p>
                 </router-link>
-            </div>
-            <p class="title">客户管理</p>
-            <div class="flex-box">
-                <!-- <router-link class="flex-item" to="./clue">
-                    <i class="iconfont icon-kehuguanli"></i>
-                    <p>公海客户</p>
-                </router-link> -->
-                <router-link class="flex-item" to="./contacts">
-                    <i class="iconfont icon-icon--"></i>
-                    <p>联系人</p>
-                </router-link>
-                <!-- <router-link class="flex-item" to="./clue">
-                    <i class="iconfont icon-yishoukuan"></i>
-                    <p>收款管理</p>
-                </router-link> -->
             </div>
             <p class="title">营销支持</p>
             <div class="flex-box">

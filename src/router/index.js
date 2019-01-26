@@ -15,6 +15,10 @@ const book = r => require.ensure([], () => r(require('@/pages/book')), 'book');
 const mine = r => require.ensure([], () => r(require('@/pages/mine')), 'mine');
 //  通知
 const notice = r => require.ensure([], () => r(require('@/pages/notice')), 'notice');
+//  站内信
+const letter = r => require.ensure([], () => r(require('@/pages/letter')), 'letter');
+//  发站内信
+const letter_add = r => require.ensure([], () => r(require('@/pages/letter_add')), 'letter_add');
 //  审批
 const approval = r => require.ensure([], () => r(require('@/pages/approval')), 'approval');
 //  审批详情
@@ -117,11 +121,29 @@ const feedback = r => require.ensure([], () => r(require('@/pages/feedback')), '
 //  编辑个人信息
 const personal_info = r => require.ensure([], () => r(require('@/pages/personal_info')), 'personal_info');
 
-
-
 //  写跟进
 const write_follow = r => require.ensure([], () => r(require('@/pages/write_follow')), 'write_follow');
 
+//  通讯录员工
+const staff = r => require.ensure([], () => r(require('@/pages/staff')), 'staff');
+//  通讯录员工详细信息
+const staff_detail = r => require.ensure([], () => r(require('@/pages/staff_detail')), 'staff_detail');
+
+//  合作伙伴
+const partner = r => require.ensure([], () => r(require('@/pages/partner')), 'partner');
+//  新增合作伙伴
+const partner_add = r => require.ensure([], () => r(require('@/pages/partner_add')), 'partner_add');
+//  合作伙伴详情
+const partner_detail = r => require.ensure([], () => r(require('@/pages/partner_detail')), 'partner_detail');
+//  合作伙伴跟进
+const partner_follow = r => require.ensure([], () => r(require('@/pages/partner_follow')), 'partner_follow');
+
+//  竞争对手
+const competitor = r => require.ensure([], () => r(require('@/pages/competitor')), 'competitor');
+//  新增竞争对手
+const competitor_add = r => require.ensure([], () => r(require('@/pages/competitor_add')), 'competitor_add');
+//  竞争对手详情
+const competitor_detail = r => require.ensure([], () => r(require('@/pages/competitor_detail')), 'competitor_detail');
 
 const routes = [
   {
@@ -137,6 +159,55 @@ const routes = [
     name: 'test3',
 		component: test3
 	},{
+    path: '/partner',
+    name: 'partner',
+		component: partner,
+    meta: {
+      title:"合作伙伴",
+    }
+	},{
+    path: '/partner_add',
+    name: 'partner_add',
+		component: partner_add,
+    meta: {
+      title:"新增合作伙伴",
+    }
+	},{
+    path: '/partner_detail',
+    name: 'partner_detail',
+		component: partner_detail,
+    meta: {
+      title:"合作伙伴详情",
+    }
+	},{
+    path: '/partner_follow',
+    name: 'partner_follow',
+		component: partner_follow,
+    meta: {
+      title:"写跟进",
+    }
+	},{
+    path: '/competitor', 
+    name: 'competitor',
+		component: competitor,
+    meta: {
+      title:"竞争对手",
+    }
+	},{
+    path: '/competitor_add', 
+    name: 'competitor_add',
+		component: competitor_add,
+    meta: {
+      title:"新增竞争对手",
+    }
+	},{
+    path: '/competitor_detail', 
+    name: 'competitor_detail',
+		component: competitor_detail,
+    meta: {
+      title:"竞争对手详情",
+    }
+	},{
     path: '/login',
     name: 'login',
 		component: login,
@@ -149,6 +220,20 @@ const routes = [
 		component: notice,
     meta: {
       title:"通知",
+    }
+	},{
+    path: '/letter',
+    name: 'letter',
+		component: letter,
+    meta: {
+      title:"站内信",
+    }
+	},{
+    path: '/letter_add',
+    name: 'letter_add',
+		component: letter_add,
+    meta: {
+      title:"发站内信",
     }
 	},{
     path: '/approval',
@@ -436,6 +521,20 @@ const routes = [
 		component: write_follow,
     meta: {
       title:"写跟进",
+    }
+	},{
+    path: '/staff',
+    name: 'staff',
+		component: staff,
+    meta: {
+      title:"",
+    }
+	},{
+    path: '/staff_detail',
+    name: 'staff_detail',
+		component: staff_detail,
+    meta: {
+      title:"",
     }
 	},{
     path: '/index',

@@ -7,9 +7,11 @@
             </swiper-item>
             <swiper-item class="item2">
                 <p>参与成员：</p>
-                <router-link :to="'./client_member?id=' + baseInfo.id + '&moduleName=crm_customer&moduleNames=客户'" class="user-list">
+                <router-link :to="'./client_member?id=' + baseInfo.id + '&moduleName=crm_customer&moduleNames=客户&isPublic=' + baseInfo.isPublic" class="user-list">
+                    <span v-show="baseInfo.isPublic == 1"><i style="float: inherit;vertical-align: sub;" class="iconfont icon-gongkai"></i></span>
                     <span v-if="index<7" :class="item.isOwner ? 'admin' : ''" v-for="(item, index) in memberList" :key="index">
-                        <img src="../assets/avatar.jpg" alt="">
+                        <img v-if="item.avatar" :src="item.avatar" alt="">
+                        <font v-else class="iconfont icon-morentouxiang"></font>
                         <i v-if="item.isOwner" class="iconfont icon-geren"></i>
                     </span>
                     <span v-show="memberList.length > 7">●●●</span>
@@ -47,7 +49,7 @@
                         </div>
                     </div>
                     <div class="footer">
-                        <router-link class="footer-tab" :to="'./client_follow?id=' + baseInfo.id + '&name=' + baseInfo.name">写跟进</router-link>
+                        <router-link v-if="isModify" class="footer-tab" :to="'./client_follow?id=' + baseInfo.id + '&name=' + baseInfo.name">写跟进</router-link>
                         <router-link class="footer-tab vux-1px-l" :to="'./visit_sign?id=' + baseInfo.id + '&name=' + baseInfo.name">拜访签到</router-link>
                         <div class="footer-tab vux-1px-l" v-if="isOwner">
                             <div @click="showSubbat = !showSubbat">更多</div>
@@ -60,11 +62,26 @@
                 </swiper-item>
                 <swiper-item class="tab-item2">
                     <div class="scroll-box" :style="isModify ? '' : 'padding-bottom: 0'">
-                        <x-table :cell-bordered="false" :content-bordered="false" :full-bordered="false">
-                            <tr v-for="(item, index) in fieldList" :key="index">
+                        <x-table :cell-bordered="false" :content-bordered="false" :full-bordered="false" class="vux-table-default">
+                            <tr v-for="(item, index) in fieldList" :key="index" v-if="item.editorType != 'tableItem'">
                                 <td width='80'>{{item.label}}</td>
-                                <td v-if="item.editorType != 'cascade'">{{baseInfo[item.name]}}</td>
+                                <td v-if="item.editorType != 'cascade' && item.editorType != 'table'">{{baseInfo[item.name]}}</td>
                                 <td v-if="item.editorType == 'cascade'">{{baseInfo[item.name] ? baseInfo[item.name].join("/") : ''}}</td>
+                                <td v-if="item.editorType == 'table'" style="padding: 0 10px 0 0;">
+                                    <x-table full-bordered class="custom-table">
+                                        <thead>
+                                            <tr>
+                                                <td v-for="(item1, index1) in tableNameObj[item.name]" :key="index1">{{item1.label}}</td>
+                                            </tr>
+                                        </thead>
+                                        <tr v-show="!(baseInfo[item.name] && baseInfo[item.name].length)">
+                                            <td colspan="100">暂无数据</td>
+                                        </tr>
+                                        <tr v-if="baseInfo[item.name] && baseInfo[item.name].length" v-for="(item2, index2) in baseInfo[item.name]" :key="index2">
+                                            <td v-for="(item1, index1) in tableNameObj[item.name]" :key="index1">{{item2[item1.name]}}</td>
+                                        </tr>
+                                    </x-table>
+                                </td>
                             </tr>
                             <tr>
                                 <td width='80'>拥有者</td>
@@ -120,7 +137,7 @@
                                 <span  class="inline_block text-ellipsis w270 text_base">{{item.opportunityName}}</span>
                                 <span class="float_r font12">{{item.createTime.split(' ')[0]}}</span>
                             </p> 
-                            <p><span class="inline_block text-ellipsis w_100">￥{{item.amount}}&nbsp;&nbsp;{{item.customerName}}</span></p>
+                            <p><span class="inline_block text-ellipsis w_100">{{item.amount}}万元&nbsp;&nbsp;{{item.customerName}}</span></p>
                         </div>
                     </div>
                     <div class="handle">
@@ -134,7 +151,7 @@
                                 <span  class="inline_block text-ellipsis w270 text_base">{{item.contractName}}</span>
                                 <span class="float_r font12">{{item.createTime.split(' ')[0]}}</span>
                             </p> 
-                            <p><span class="inline_block text-ellipsis w270">￥{{item.contracAmount}}&nbsp;&nbsp;{{item.customerName}}</span><span class="float_r font12">{{item.contractState}}</span></p>
+                            <p><span class="inline_block text-ellipsis w270">{{item.contracAmount}}万元&nbsp;&nbsp;{{item.customerName}}</span><span class="float_r font12">{{item.contractState}}</span></p>
                         </div>
                     </div>
                     <div class="handle">
@@ -147,7 +164,7 @@
                             <span  class="inline_block text-ellipsis w320 text_333">{{item.fileName}}</span>
                             <span class="float_r" v-if="isOwner"><i class="iconfont icon-shanchu icon_handle" @click="delAnnex(item.id)"></i></span>
                         </p> 
-                        <p><span class="font12">{{formatDate(new Date(item.upTime), 'yyyy-MM-dd hh:mm:ss')}}</span></p>
+                        <p><span class="font12">{{iosDate(item.upTime, 'yyyy-MM-dd hh:mm:ss')}}</span></p>
                     </div>
                 </swiper-item>
                 <swiper-item class="tab-item7">
@@ -176,7 +193,10 @@
                     <check-icon :value.sync="checkBox4"><span class="text_777">合同</span></check-icon>
                 </cell>
             </group>
-            <div class="add"><a @click="turnSave">确定</a></div>
+            <div class="add">
+                <a class=" vux-1px-r" @click="popup2 = false">取消</a>
+                <a @click="turnSave">确定</a>
+            </div>
         </popup>
         <popup v-model="popup1" @on-show="showPopup1" height="100%">
             <div class="popup0">
@@ -235,6 +255,7 @@
                 isDownload: false,      //  是否有下载权限
                 isOwner: false,         //  是否是拥有者
                 addLabel: [],           
+                tableNameObj: {},						//	自定义表格字段
 
             /********************跟进记录********************* */
                 follows: [],
@@ -440,6 +461,18 @@
                     this.$vux.loading.show()
                     this.$post("/crm/extFieldPR/getField", {tableName: 'crm_customer'}, (data) => {
                         this.fieldList = data.list
+                        data.tableList.map((item) => {
+                            this.tableNameObj[item] = []
+                        })
+                        data.list.map((item) => {
+                            if(item.editorType == 'tableItem'){
+                                this.tableNameObj[item.dictName].push({
+                                    name: item.name,
+                                    label: item.label
+                                })
+                            }
+                        })
+                        console.log(this.tableNameObj)
                     })
                 }
             },
@@ -629,18 +662,18 @@
         overflow: auto;
         padding-bottom: 46px;
         box-sizing: border-box;
-        .vux-table{
+        .vux-table-default{
             margin-top: 15px;
             line-height: 20px;
-            &:after, td:before{
+            &:after, >tr>td:before{
                 display: none;
             }
-            td:first-of-type{
+            >tr>td:first-of-type{
                 text-align: left;
                 padding: 0 0 8px 20px;
                 vertical-align: text-top;
             }
-            td:last-of-type{
+            >tr>td:last-of-type{
                 text-align: left;
                 padding: 0 10px 8px;
             }

@@ -6,6 +6,7 @@ Vue.use(Vuex)
 const state = {
     crmUserName: '',
 	crmpassword: '',
+	wxType: '',
 }
 
 const mutations = {}

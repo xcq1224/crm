@@ -14,25 +14,25 @@
                 <div class="vux-1px-r icon" @click="search">
                     <span><i class="iconfont icon-chaxun"></i></span>
                 </div>
-                <router-link class="icon" to="./clue_add?handleType=0">
+                <router-link class="icon" to="./partner_add?handleType=0">
                     <span><i class="iconfont icon-add1"></i></span>
                 </router-link>
             </div>
         </div>
         <div class="main">
-            <router-link :to="'./clue_detail?id=' + item.id" class="list-item" v-for="(item, index) in tableData" :key="index">
+            <router-link :to="'./partner_detail?id=' + item.id" class="list-item" v-for="(item, index) in tableData" :key="index">
                 <p>
                     <span  class="inline_block text-ellipsis w270 text_333">{{item.name}}</span>
-                    <span class="float_r font12">{{item.marketingClueState}}</span>
+                    <span class="float_r font12">{{item.createTime.split(" ")[0]}}</span>
                 </p> 
-                <p><span class="inline_block w_100 text-ellipsis">{{item.customerName}}</span></p>
+                <p><span class="inline_block w_100 text-ellipsis">{{item.cooperationStatus}}</span></p>
             </router-link>
         </div>
         <search
             v-show="is_search"
             @on-submit="getTableData(1)"
             v-model="value"
-            placeholder="请输入线索名称"
+            placeholder="请输入合作伙伴名称"
             @on-cancel="onCancel"
             ref="search" style="position:absolute;top:0;">
         </search>
@@ -48,7 +48,7 @@
     import { Divider } from 'vux'
     import { Tab, TabItem, Sticky, XButton, Swiper, SwiperItem } from 'vux'
     import { Card } from 'vux'
-    import { PopupPicker, PopupRadio } from 'vux'
+    import { PopupPicker, PopupRadio  } from 'vux'
     import { Search } from 'vux'
     import { setTimeout } from 'timers';
 
@@ -85,44 +85,24 @@
                         value: '我参与的',
                         key: 2
                 }],
-                value2: ['marketingClueState', ''],
+                value2: ['type', ''],
                 showPopupPicker2: false,
                 list2: [{
-                        name: '线索状态',
-                        value: 'marketingClueState',
+                        name: '合作状态',
+                        value: 'cooperationStatus',
                         parent: 0
                     }, {
-                        name: '跟进状态',
-                        value: 'state',
-                        parent: 0
-                    }, {
-                        name: '线索来源',
-                        value: 'type',
+                        name: '合作方式',
+                        value: 'cooperationType',
                         parent: 0
                     }, {
                         name: '请选择',
                         value: '',
-                        parent: 'marketingClueState'
-                    }, {
-                        name: '进行中',
-                        value: '0',
-                        parent: 'marketingClueState'
-                    }, {
-                        name: '已转化',
-                        value: '1',
-                        parent: 'marketingClueState'
-                    }, {
-                        name: '已关闭',
-                        value: '2',
-                        parent: 'marketingClueState'
+                        parent: 'cooperationStatus'
                     }, {
                         name: '请选择',
                         value: '',
-                        parent: 'state'
-                    }, {
-                        name: '请选择',
-                        value: '',
-                        parent: 'type'
+                        parent: 'cooperationType'
                 }],
                 value3: ['createTime', '-1'],
                 showPopupPicker3: false,
@@ -135,7 +115,7 @@
                         value: 'lastFollowTime',
                         parent: 0
                     }, {
-                        name: '线索名称',
+                        name: '合作伙伴名称',
                         value: 'name',
                         parent: 0
                     }, {
@@ -172,31 +152,31 @@
         },
         mounted() {
             //  获取数据字典
-            let list = ["crm-xs-gjzt", "crm-xsly"]
+            let list = ["crm-hzzt", "crm-hzfs"]
             this.$post("/crm/getDict", {"list": list}, (data) => {
-                data['crm-xs-gjzt'].map((item, index) => {
+                data['crm-hzzt'].map((item, index) => {
                     this.list2.push({ 
                             name: item,
                             value: item,
-                            parent: 'state'
+                            parent: 'cooperationStatus'
                     })
                 })
-                data['crm-xsly'].map((item, index) => {
+                data['crm-hzfs'].map((item, index) => {
                     this.list2.push({ 
                             name: item,
                             value: item,
-                            parent: 'type'
+                            parent: 'cooperationType'
                     })
                 })
             })
         },
         activated(){
-            this.value2 = ['state', '']
+            this.value2 = ['type', '']
             this.value3 = ['createTime', '-1']
             this.getTableData(1)
         },
         methods: {
-            onChange1(val){
+            onChange1(){
                 this.getTableData(1)
             },
             onChange2(){
@@ -206,7 +186,7 @@
                 this.getTableData(1)
             },
 
-            //  获取线索
+            //  获取客户
             getTableData(val){
                 this.currentPage = val
                 let params = {
@@ -219,7 +199,7 @@
                 params.classify = this.value1.toString()
                 params[this.value2[0]] = this.value2[1]
                 this.$vux.loading.show()
-                this.$post("/crm/marketingCluePR/queryMarketingClue", params, (data) => {
+                this.$post("/crm/partnerPR/getAll", params, (data) => {
                     this.tableData = data.list;
                     this.is_search = false
                     this.value = ''

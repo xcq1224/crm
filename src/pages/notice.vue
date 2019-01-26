@@ -1,37 +1,9 @@
 <template>
     <div class="page"> 
         <div class="main">
-            <div class="notice-item">
-                <p class="active">张三审批驳回了你的合同，事故发生快乐按时发货撒即可更好解决考试大纲的顾客拉开了困死了大开发卡萨开放接口</p>
-                <span class="datetime">2018-10-03 19:20</span>
-            </div>
-            <div class="notice-item">
-                <p class="active">张三审批驳回了你的合同，事故发生快乐按时发货撒即可更好解决考试大纲的顾客拉开了困死了大开发卡萨开放接口</p>
-                <span class="datetime">2018-10-03 19:20</span>
-            </div>
-            <div class="notice-item">
-                <p class="active">张三审批驳回了你的合同，事故发生快乐按时发货撒即可更好解决考试大纲的顾客拉开了困死了大开发卡萨开放接口</p>
-                <span class="datetime">2018-10-03 19:20</span>
-            </div>
-            <div class="notice-item">
-                <p class="active">张三审批驳回了你的合同，事故发生快乐按时发货撒即可更好解决考试大纲的顾客拉开了困死了大开发卡萨开放接口</p>
-                <span class="datetime">2018-10-03 19:20</span>
-            </div>
-            <div class="notice-item">
-                <p class="active">张三审批驳回了你的合同，事故发生快乐按时发货撒即可更好解决考试大纲的顾客拉开了困死了大开发卡萨开放接口</p>
-                <span class="datetime">2018-10-03 19:20</span>
-            </div>
-            <div class="notice-item">
-                <p class="active">张三审批驳回了你的合同，事故发生快乐按时发货撒即可更好解决考试大纲的顾客拉开了困死了大开发卡萨开放接口</p>
-                <span class="datetime">2018-10-03 19:20</span>
-            </div>
-            <div class="notice-item">
-                <p>张三审批驳回了你的合同，事故发生快乐按时发货撒即可更好解决考试大纲的顾客拉开了困死了大开发卡萨开放接口</p>
-                <span class="datetime">2018-10-03 19:20</span>
-            </div>
-            <div class="notice-item">
-                <p>张三审批驳回了你的合同，事故发生快乐按时发货撒即可更好解决考试大纲的顾客拉开了困死了大开发卡萨开放接口</p>
-                <span class="datetime">2018-10-03 19:20</span>
+            <div class="notice-item" v-for="(item, index) in notifyList" :key="index">
+                <p :class="item.state == '0' ? 'active' : ''">{{item.content}}</p>
+                <span class="datetime">{{iosDate(item.arriveTime, "yyyy-MM-dd hh:mm:ss")}}</span>
             </div>
             <divider>已经到底了</divider>
         </div>
@@ -53,20 +25,30 @@
         },
         data () {
             return {
-                tabIndex: 0,
-
+                notifyList: [],
             }
         },
         activated(){
-
+            this.getNotify()
         },
-        // deactivated(){
-        //     console.log(3);
-        // },
         methods: {
-            abc(){
-                console.log(3)
-            }
+            getNotify(){
+                this.$vux.loading.show()
+                this.$post("/api/NotifyPR/getNotify", {}, (data) => {
+                    this.notifyList = data.list
+                    let ids = []
+                    data.list.some((item, index) => {
+                        if(item.state == '0'){
+                            ids.push(item.id)
+                        }else{
+                            return true
+                        }
+                    })
+                    if(ids.length){
+                        this.$post("/api/NotifyPR/setIsReady", {ids: ids}, (data) => {})
+                    }
+                })
+            },
         },
     }
 

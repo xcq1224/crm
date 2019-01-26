@@ -7,24 +7,24 @@
         </tab>
         <div class="main">
             <div v-show="tabIndex == 0">
-                <router-link :to="'./work_check?id=' + item.id" class="list-item" v-for="(item, index) in dateList" :key="index">
+                <router-link :to="'./work_check?id=' + item.id + '&type=0&date=' + item.createTime.split(' ')[0]" class="list-item" v-for="(item, index) in dateList" :key="index">
                     <p><span  class="text_333">{{item.createUserName}}的日报</span><span class="font12 float_r">{{item.createTime}}</span></p>
                 </router-link>
             </div>
             <div v-show="tabIndex == 1">
-                <router-link :to="'./work_check?id=' + item.id" class="list-item" v-for="(item, index) in weekList" :key="index">
+                <router-link :to="'./work_check?id=' + item.id + '&type=1&date=' + item.createTime.split(' ')[0]" class="list-item" v-for="(item, index) in weekList" :key="index">
                     <p><span  class="text_333">{{item.createUserName}}的周报</span><span class="font12 float_r">{{item.createTime}}</span></p>
                 </router-link>
             </div>
             <div v-show="tabIndex == 2">
-                <router-link :to="'./work_check?id=' + item.id" class="list-item" v-for="(item, index) in monthList" :key="index">
+                <router-link :to="'./work_check?id=' + item.id + '&type=2&date=' + item.createTime.split(' ')[0]" class="list-item" v-for="(item, index) in monthList" :key="index">
                     <p><span  class="text_333">{{item.createUserName}}的月报</span><span class="font12 float_r">{{item.createTime}}</span></p>
                 </router-link>
             </div>
         </div>
-        <router-link to="./work_write" class="submit-btn">新增</router-link>
+        <router-link :to="'./work_write?handleType=' + tabIndex" class="submit-btn">新增</router-link>
     </div>
-</template>
+</template>1
 
 <script>
 

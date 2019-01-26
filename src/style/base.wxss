@@ -169,6 +169,10 @@ textarea {
   width: auto;
   height: auto;
 }
+.page .crm_detial_header .item2 .user-list span {
+  position: relative;
+  top: -6px;
+}
 .page .crm_detial_header .item2 .user-list .admin {
   position: relative;
 }
@@ -199,6 +203,12 @@ textarea {
 .page .crm_detial_header .item2 .user-list img:after {
   content: '\e602';
   display: block;
+}
+.page .crm_detial_header .item2 .user-list font {
+  font-size: 34px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
 }
 .page .crm_detial_header .item2 .user-list i {
   float: right;
@@ -249,4 +259,22 @@ textarea {
 }
 .weui-cells.vux-search_show .weui-cell:last-child {
   margin-bottom: 0 !important;
+}
+.vux-table.custom-table {
+  margin-bottom: 20px;
+}
+.vux-table.custom-table td {
+  text-align: center;
+  line-height: 16px;
+  padding: 6px 0;
+  vertical-align: initial;
+}
+.vux-table.custom-table td:after {
+  border-right-width: 1px !important;
+}
+.vux-table.custom-table td:before {
+  border-bottom-width: 1px !important;
+}
+.weui-dialog__btn_primary {
+  color: #409EFF;
 }

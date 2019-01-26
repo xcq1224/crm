@@ -24,6 +24,9 @@
                 <cell is-link v-model="formAdd.selfSignatory" @click.native="popup4 = true">
                     <div slot="title">我方签约人</div>
                 </cell>
+                <cell is-link v-model="formAdd.businessManagerName" @click.native="popup6 = true">
+                    <div slot="title"><span style="color: red;">* </span>经营经理</div>
+                </cell>
                 <cell is-link v-if="query.handleType == '0'" v-model="formAdd.ownerCname" @click.native="popup3 = true">
                     <div slot="title"><span style="color: red;">* </span>合同负责人</div>
                 </cell>
@@ -112,6 +115,22 @@
                 </search>
             </div>
         </popup>
+        <!-- 添加经营经理 -->
+        <popup v-model="popup6" @on-show="showPopup6" height="100%">
+            <div class="popup0">
+                <search
+                    @result-click="resultClick6"
+                    @on-change="getResult6"
+                    :results="results6"
+                    v-model="searchValue6"
+                    position="absolute"
+                    auto-scroll-to-top
+                    top="0"
+                    @on-cancel="onCancel6"
+                    ref="search6">
+                </search>
+            </div>
+        </popup>
     </div>
 </template>
 
@@ -179,6 +198,11 @@
                 results5: [],                        //  搜索结果
                 financialManagers: [],
                 searchValue5: '',                    //  搜索文本
+
+                //  经营经理
+                popup6: false,
+                results6: [],                        //  搜索结果
+                searchValue6: '',                    //  搜索文本
             }
         },
         activated(){
@@ -249,6 +273,7 @@
                     })
                     this.results3 = this.deepClone(this.staffs)
                     this.results4 = this.deepClone(this.staffs)
+                    this.results6 = this.deepClone(this.staffs)
                 })
             },
             //  获取财务经理
@@ -275,8 +300,9 @@
                     this.toastFail("请输入合同名称", "160px")
                     return;
                 }
-                if(!this.formAdd.contracAmount){
-                    this.toastFail("请输入合同总金额", "160px")
+                let reg = /(^[1-9]([0-9]+)?(\.[0-9]{1,4})?$)|(^(0){1}$)|(^[0-9]\.[0-9]{1,4}?$)/;
+                if(!reg.test(this.formAdd.contracAmount)){
+                    this.toastFail("请输入合同总金额(最多四位小数)", "260px")
                     return;
                 }
                 if(!this.formAdd.signatoryTime){
@@ -287,6 +313,10 @@
                     this.toastFail("请选择财务经理", "160px")
                     return;
                 }
+                if(!this.formAdd.businessManagerName){
+                    this.toastFail("请选择经营经理", "160px")
+                    return;
+                }
                 if(!this.formAdd.ownerCname){
                     this.toastFail("请选择合同负责人", "160px")
                     return;
@@ -294,6 +324,12 @@
                 let formAdd = this.deepClone(this.formAdd)
                 delete formAdd.customerName
                 delete formAdd.opportunityName
+
+                if(formAdd.businessManagerName.indexOf("/") != -1){
+                    formAdd.businessManagerId = formAdd.businessManagerName.split('/')[0]
+                    formAdd.businessManagerName = formAdd.businessManagerName.split('/')[1]
+                }
+
                 // console.log(formAdd)
                 if(this.query.handleType == '0' || this.query.handleType == '2'){
                     this.$post("/crm/contractPR/addContract", {contractAdd: formAdd, openTicketAdd: {}}, (data) => {
@@ -305,7 +341,7 @@
                         formAdd.financialManagerId = formAdd.financialManagerName.split('/')[0]
                         formAdd.financialManagerName = formAdd.financialManagerName.split('/')[1]
                     }
-                    if(formAdd.selfSignatory.indexOf("/") != -1){
+                    if(formAdd.selfSignatory && formAdd.selfSignatory.indexOf("/") != -1){
                         formAdd.selfSignatoryId = formAdd.selfSignatory.split('/')[0]
                         formAdd.selfSignatory = formAdd.selfSignatory.split('/')[1]
                     }
@@ -503,6 +539,44 @@
             match5(val){
                 let rs = []
                 this.financialManagers.map((item) => {
+                    if(item.title.indexOf(val) != -1){
+                        rs.push(item)
+                    }
+                })
+                return rs
+            },
+        /************************************添加经营经理****************************** */
+            showPopup6(){
+                setTimeout(() => {
+                    this.$refs.search6.setFocus()
+                    setTimeout(() => {
+                        this.$refs.search6.setBlur()
+                    }, 0);
+                }, 0);
+            },
+
+            resultClick6 (item) {
+                if(item.id){
+                    this.formAdd.businessManagerName = item.id + '/' + item.name
+                    this.popup6 = false
+                }
+            },
+            getResult6 (val) {
+                this.results6 = val ? this.match6(val) : this.staffs
+                if(!this.results6.length){
+                    this.results6 = [{
+                        id: '',
+                        name: '',
+                        title: '暂无数据'
+                    }]
+                }
+            },
+            onCancel6 () {
+                this.popup6 = false
+            },
+            match6(val){
+                let rs = []
+                this.staffs.map((item) => {
                     if(item.title.indexOf(val) != -1){
                         rs.push(item)
                     }

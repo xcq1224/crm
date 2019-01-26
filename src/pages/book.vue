@@ -1,16 +1,20 @@
 <template>
     <div class="has-tabbar page"> 
         <div class="main">
-            <group gutter='0'>
-                <cell class="cell">
-                    <span slot="title"><i class="iconfont icon-gongsimingcheng"></i>中冶南方集团</span>
-                </cell>
-                <cell class="cell" is-link link="./feedback">
-                    <span slot="title"><i class="iconfont icon-zuzhijiagoujiekou"></i>组织架构</span>
-                </cell>
-                <cell class="cell" is-link>
-                    <span slot="title"><i class="iconfont icon-hezuohuoban"></i>外部联系人</span>
-                </cell>  
+            <search
+                @result-click="resultClick5"
+                @on-change="getResult5"
+                :results="results5"
+                v-model="searchValue5"
+                position="absolute"
+                auto-scroll-to-top
+                top="0"
+                @on-cancel="isSearch = false"
+                @on-focus="isSearch = true"
+                ref="search">
+            </search>
+            group gutter='10px' v-show="!isSearch">
+                <my-tree :data="theData" @getSubMenu="getSubMenu" :fun="getSubMenu"></my-tree>
             </group>
         </div>
     </div>
@@ -19,7 +23,8 @@
 <script>
 
     import { XHeader, Actionsheet, TransferDom, ButtonTab, ButtonTabItem } from 'vux'
-    import { Cell, CellBox, CellFormPreview, Group, Badge } from 'vux'
+    import { Cell, CellBox, CellFormPreview, Group, Badge, Search } from 'vux'
+    import myTree from '../components/treeMune'
 
     export default {
         components: {
@@ -32,22 +37,59 @@
             CellFormPreview,
             CellBox,
             Badge,
+            myTree,
+            Search,
         },
         data () {
             return {
-                tabIndex: 0,
+                theData: [],
 
+                results5: [],                        //  搜索结果
+                searchValue5: '',                    //  搜索文本
+                isSearch: false,
             }
         },
+        created(){
+            this.$post("/api/DeptController/getRootDepts", {}, (data) => {
+                this.theData = data.list
+            })
+        },
         activated(){
-            
+            this.isSearch = false
         },
-        // deactivated(){
-        //     console.log(3);
-        // },
+        deactivated(){
+            this.$refs.search.setBlur()
+            this.searchValue5 = ''
+            this.results5 = []
+        },
         methods: {
-
-        },
+                        0resultClick5 (item) {
+                if(item.id){
+                    this.$router.push('./staff_detail?id='+item.id+'&title='+item.userCname)
+                }
+            },
+            getResult5 (val) {
+                this.$post("/api/DeptController/queryStaff", {name: val}, (data) => {
+                    console.log(data)
+                    this.results5 = []
+                    data.list.map((item) => {
+                        this.results5.push({
+                            id: item.id,
+                            name: item.userCname,
+                            title: item.userCname + '       ' + item.deptName
+                        })
+                    })
+                    if(!this.results5.length){
+                        this.results5 = [{
+                            id: '',
+                            name: '',
+                            title: '暂无数据'
+                        }]
+                    }
+                })
+            },
+            
+        }
     }
 
 </script>
@@ -55,27 +97,9 @@
 <style lang="less" scoped>
     @baseColor: #16A4FA;
     .main{
-        .cell{
-            font-size: 14px;
-            padding: 7px 15px;
-            color: @baseColor;
-            img{
-                width: 64px;
-                height: 64px;
-                border-radius: 50%;
-                float: left;
-                margin: 20px 10px 20px 0;
-            }
-            .title{
-                line-height: 26px;
-            }
-            i{
-                font-size: 22px;
-                vertical-align: middle;
-                margin-right: 10px;
-            }
-        }
+        padding-bottom: 80px;
     }
 </style>
+
 
 

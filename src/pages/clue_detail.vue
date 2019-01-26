@@ -7,9 +7,11 @@
             </swiper-item>
             <swiper-item class="item2">
                 <p>参与成员：</p>
-                <router-link :to="'./client_member?id=' + baseInfo.id + '&moduleName=crm_marketing_clue&moduleNames=线索'" class="user-list">
+                <router-link :to="'./client_member?id=' + baseInfo.id + '&moduleName=crm_marketing_clue&moduleNames=线索&isPublic=' + baseInfo.isPublic" class="user-list">
+                    <span v-show="baseInfo.isPublic == 1"><i style="float: inherit;vertical-align: sub;" class="iconfont icon-gongkai"></i></span>
                     <span v-if="index<7" :class="item.isOwner ? 'admin' : ''" v-for="(item, index) in memberList" :key="index">
-                        <img src="../assets/avatar.jpg" alt="">
+                        <img v-if="item.avatar" :src="item.avatar" alt="">
+                        <font v-else class="iconfont icon-morentouxiang"></font>
                         <i v-if="item.isOwner" class="iconfont icon-geren"></i>
                     </span>
                     <span v-show="memberList.length > 7">●●●</span>
@@ -44,14 +46,14 @@
                         </div>
                     </div>
                     <div class="footer">
-                        <router-link class="footer-tab" :to="'./clue_follow?id=' + baseInfo.id + '&name=' + baseInfo.name + '&customerId=' + baseInfo.customerId">写跟进</router-link>
+                        <router-link v-if="isModify" class="footer-tab" :to="'./clue_follow?id=' + baseInfo.id + '&name=' + baseInfo.name + '&customerId=' + baseInfo.customerId">写跟进</router-link>
                         <router-link class="footer-tab vux-1px-l" :to="'./clue_opportunity?id=' + baseInfo.id">转化机会</router-link>
                         <div class="footer-tab vux-1px-l" v-if="isOwner">
                             <div @click="showSubbat = !showSubbat">更多</div>
                             <div v-show="showSubbat" @click="showSubbat = false" class="footer-subtab vux-1px-l">
                                 <div class="vux-1px-b" @click="popup2 = true" v-if="baseInfo.marketingClueState != '已关闭'">关闭</div>
                                 <div class="vux-1px-b" @click="delClue">删除</div>
-                                <div @click="popup1 = true">转给他人</div>
+                                <div @click="popup3 = true">转给他人</div>
                             </div>
                         </div>
                     </div>
@@ -101,7 +103,7 @@
                                 <span  class="inline_block text-ellipsis w270 text_base">{{item.opportunityName}}</span>
                                 <span class="float_r font12">{{item.createTime.split(' ')[0]}}</span>
                             </p> 
-                            <p><span class="inline_block text-ellipsis w_100">￥{{item.amount}}&nbsp;&nbsp;{{baseInfo.customerName}}</span></p>
+                            <p><span class="inline_block text-ellipsis w_100">{{item.amount}}(万元)&nbsp;&nbsp;{{baseInfo.customerName}}</span></p>
                         </div>
                     </div>
                 </swiper-item>
@@ -111,7 +113,7 @@
                             <span  class="inline_block text-ellipsis w320 text_333">{{item.fileName}}</span>
                             <span class="float_r" v-if="isOwner"><i class="iconfont icon-shanchu icon_handle" @click="delAnnex(item.id)"></i></span>
                         </p> 
-                        <p><span class="font12">{{formatDate(new Date(item.upTime), 'yyyy-MM-dd hh:mm:ss')}}</span></p>
+                        <p><span class="font12">{{iosDate(item.upTime, 'yyyy-MM-dd hh:mm:ss')}}</span></p>
                     </div>
                 </swiper-item>
                 <swiper-item class="tab-item4">
@@ -125,6 +127,20 @@
                 </swiper-item>
             </swiper>
         </div>
+        <!-- 转给他人弹框 -->
+        <popup v-model="popup3" class="turn-box" @on-show="showPopup3" height="100%">
+            <group gutter='0' label-width="150px">
+                <cell is-link title="新拥有者" @click.native="popup1 = true" v-model="staffName" class="font14"></cell>
+                <cell class="font14">
+                    <div slot="title" style="width: 200px;">保留原拥有者为团队成员</div>
+                    <check-icon :value.sync="checkBox1"></check-icon>
+                </cell>
+            </group>
+            <div class="add">
+                <a class=" vux-1px-r" @click="popup3 = false">取消</a>
+                <a @click="turnSave">确定</a>
+            </div>
+        </popup>
         <!-- 转给他人 -->
         <popup v-model="popup1" @on-show="showPopup1" height="100%">
             <div class="popup0">
@@ -159,7 +175,7 @@
 
     import { XHeader, Actionsheet, TransferDom, ButtonTab, ButtonTabItem } from 'vux'
     import { Divider } from 'vux'
-    import { Tab, TabItem, Sticky, XButton, Swiper, SwiperItem, XTable, Search, Popup, XTextarea } from 'vux'
+    import { Tab, TabItem, Sticky, XButton, Swiper, SwiperItem, XTable, Search, Popup, XTextarea, Group, Cell, CheckIcon } from 'vux'
 
     export default {
         components: {
@@ -179,6 +195,9 @@
             Search,
             Popup,
             XTextarea,
+            Group, 
+            Cell,
+            CheckIcon,
         },
         data () {
             return {
@@ -204,6 +223,10 @@
                 results1: [],                        //  搜索结果
                 staffs: [],
                 searchValue1: '',                    //  搜索文本
+                popup3: false,                      
+                staffName: '',              //  转给他人姓名
+                staffId: '',              //  转给他人id
+                checkBox1: false,           //  保留原拥有者为团队成员
 
                 //  关闭
                 popup2: false,
@@ -211,13 +234,15 @@
                 
             }
         },
+        mounted(){
+            this.getAllStaff()
+        },
         activated(){
             this.showSubbat = false
             this.$vux.loading.show()
             this.query = this.$router.currentRoute.query
             this.getBaseInfo()
             this.getMembers()
-            this.getAllStaff()
         },
         methods: {
             //  获取基本信息
@@ -282,6 +307,31 @@
                 return true
             },
         /**---------------------------------------------转给他人--------------------------------------------- */
+            //  打开弹框清空表单
+            showPopup3(){
+                this.staffName = ''
+                this.staffId = ''
+                this.checkBox1 = false
+            },
+            //  确定转给他人
+            turnSave(){
+                console.log()
+                if(!this.staffId){
+                    this.toastFail("请选择新拥有者！", "200px")
+                    return
+                }
+                let list = [this.query.id]
+                let params = {
+                    list: list,
+                    ownerId: this.staffId,
+                    ifLeft: this.checkBox1,
+                }
+                this.$post("/crm/marketingCluePR/turnOther", params, (data) => {
+                    this.toastSuccess("转移成功！")
+                    this.popup3 = false
+                    this.goBack()
+                })
+            },
             //  获取所员工
             getAllStaff(){
                 this.$post("/crm/getAllStaff", {}, (data) => {
@@ -307,16 +357,9 @@
             //  转给他人
             resultClick1 (item) {
                 if(item.id){
-                    let params = {
-                        list: [this.query.id],
-                        ownerId: item.id
-                    }
-                    this.$vux.loading.show()
-                    this.$post("/crm/marketingCluePR/turnOther", params, (data) => {
-                        this.toastSuccess("转移成功！")
-                        this.popup1 = false
-                        this.goBack()
-                    })
+                    this.staffName = item.name
+                    this.staffId = item.id
+                    this.popup1 = false
                 }
             },
             getResult1 (val) {
@@ -569,6 +612,48 @@
                     background: @baseColor;
                     color: #fff;
                 }
+            }
+        }
+    }
+    .handle{
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 40px;
+        border-top: 1px solid @baseColor;
+        display: flex;
+        font-size: 14px;
+        background: #fff;
+        z-index: 5;
+        a{
+            flex: 1;
+            text-align: center;
+            line-height: 40px;
+            color: @baseColor;
+            &.active{
+                background: @baseColor;
+                color: #fff;
+            }
+        }
+    }
+    .add{
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 40px;
+        border-top: 1px solid @baseColor;
+        display: flex;
+        font-size: 14px;
+        background: #fff;
+        z-index: 5;
+        a{
+            flex: 1;
+            text-align: center;
+            line-height: 40px;
+            color: @baseColor;
+            &.active{
+                background: @baseColor;
+                color: #fff;
             }
         }
     }

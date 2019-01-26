@@ -1,20 +1,34 @@
 <template>
     <div class="page"> 
-        <swiper class="crm_detial_header" :show-dots="false">
+        <swiper class="crm_detial_header" dots-class="dots" :auto='false' dots-position="center">
             <swiper-item class="item1">
                 <p class="title">{{baseInfo.contractName}}</p>
-                <p>总金额：￥{{baseInfo.contracAmount}}</p>
+                <p>总金额(万元)：{{baseInfo.contracAmount}}</p>
                 <p>合同状态：{{baseInfo.contractState}}</p>
+            </swiper-item>
+            <swiper-item class="item2">
+                <p>参与成员：</p>
+                <router-link :to="'./client_member?id=' + baseInfo.id + '&moduleName=crm_marketing_contract&moduleNames=营销合同&isPublic=' + baseInfo.isPublic" class="user-list">
+                    <span v-show="baseInfo.isPublic == 1"><i style="float: inherit;vertical-align: sub;" class="iconfont icon-gongkai"></i></span>
+                    <span v-if="index<7" :class="item.isOwner ? 'admin' : ''" v-for="(item, index) in memberList" :key="index">
+                        <img v-if="item.avatar" :src="item.avatar" alt="">
+                        <font v-else class="iconfont icon-morentouxiang"></font>
+                        <i v-if="item.isOwner" class="iconfont icon-geren"></i>
+                    </span>
+                    <span v-show="memberList.length > 7">●●●</span>
+                    <i class="iconfont icon-right"></i>
+                </router-link>
             </swiper-item>
         </swiper>
         <div class="main">
             <tab class="vux-1px-b" :line-width=2 custom-bar-width="80%" :scroll-threshold='6' v-model="tabIndex">
                 <tab-item class="vux-center" :selected="tabIndex == 0" @click="tabIndex = 0">详情</tab-item>
-                <tab-item class="vux-center" :selected="tabIndex == 1" @click="tabIndex = 1">收款计划</tab-item>
-                <tab-item class="vux-center" :selected="tabIndex == 2" @click="tabIndex = 2">收款</tab-item>
-                <tab-item class="vux-center" :selected="tabIndex == 3" @click="tabIndex = 3">开票</tab-item>
-                <tab-item class="vux-center" :selected="tabIndex == 4" @click="tabIndex = 4">附件</tab-item>
-                <tab-item class="vux-center" :selected="tabIndex == 5" @click="tabIndex = 5">日志</tab-item>
+                <tab-item class="vux-center" :selected="tabIndex == 1" @click="tabIndex = 1">开票信息</tab-item>
+                <tab-item class="vux-center" :selected="tabIndex == 2" @click="tabIndex = 2">收款计划</tab-item>
+                <tab-item class="vux-center" :selected="tabIndex == 3" @click="tabIndex = 3">收款</tab-item>
+                <tab-item class="vux-center" :selected="tabIndex == 4" @click="tabIndex = 4">开票记录</tab-item>
+                <tab-item class="vux-center" :selected="tabIndex == 5" @click="tabIndex = 5">附件</tab-item>
+                <tab-item class="vux-center" :selected="tabIndex == 6" @click="tabIndex = 6">日志</tab-item>
             </tab>
             <swiper v-model="tabIndex" :show-dots="false" height="100%" @on-index-change="getInfoByindex">
                 <swiper-item class="tab-item2">
@@ -62,22 +76,48 @@
                             </tr>
                         </x-table>
                     </div>
-                    <div class="footer">
+                    <div class="footer" v-if="isModify">
                         <router-link class="footer-tab" :to="'./contract_add?handleType=1&id=' + baseInfo.id">编辑</router-link>
-                        <div class="footer-tab vux-1px-l" @click="popup1 = true">转给他人</div>
-                        <div class="footer-tab vux-1px-l" @click="delContract">删除</div>
+                        <div v-if="isOwner" class="footer-tab vux-1px-l" @click="popup3 = true">转给他人</div>
+                        <div v-if="isOwner" class="footer-tab vux-1px-l" @click="delContract">删除</div>
+                    </div>
+                </swiper-item>
+                <swiper-item class="tab-item5">
+                    <div class="scroll-box">
+                        <x-table :cell-bordered="false" :content-bordered="false" :full-bordered="false">
+                            <tr>
+                                <td width='100'>纳税识别号</td>
+                                <td>{{customer.taxNo}}</td>
+                            </tr>
+                            <tr>
+                                <td>开票地址</td>
+                                <td>{{customer.companyAddress}}</td>
+                            </tr>
+                            <tr>
+                                <td>开票电话</td>
+                                <td>{{customer.companyPhone}}</td>
+                            </tr>
+                            <tr>
+                                <td>开户银行</td>
+                                <td>{{customer.openBank}}</td>
+                            </tr>
+                            <tr>
+                                <td>开户账号</td>
+                                <td>{{customer.openAccount}}</td>
+                            </tr>
+                        </x-table>
                     </div>
                 </swiper-item>
                 <swiper-item class="tab-item3">
                     <div class="scroll-box">
                         <div class="amount" v-for="(item, index) in receiptPlans" :key="index">
                             <p class="title"><span class="status" :class="item.receiptstate == '未完成'?'fail' : 'success'">{{item.receiptstate}}</span>第{{item.receiptNum}}期收款计划</p>
-                            <p><span class="label">计划收款日期</span><span class="text_333">{{item.planReceiptTime}}</span></p>
-                            <p><span class="label">计划收款金额</span><span class="text_333">￥{{item.planPaymentAmount}}</span></p>
+                            <p><span class="label" style="width: 160px;">计划收款日期</span><span class="text_333">{{item.planReceiptTime}}</span></p>
+                            <p><span class="label" style="width: 160px;">计划收款金额(万元)</span><span class="text_333">{{item.planPaymentAmount}}</span></p>
                             <p class="set status" v-if="item.receiptstate == '未完成'" @click="setFinish(item.receiptId, index)">设置完成</p>
                         </div>
                     </div>
-                    <div class="handle">
+                    <div class="handle" v-if="isModify">
                         <router-link :to="'./collection_plan_deploy?id=' + baseInfo.id + '&customerId=' + baseInfo.customerId + '&contractAmount=' + baseInfo.contracAmount">配置收款计划</router-link>
                     </div>
                 </swiper-item>
@@ -85,7 +125,7 @@
                     <div class="scroll-box">
                         <div class="amount" v-for="(item, index) in receipts" :key="index">
                             <p><span class="label">收款日期</span><span class="text_333 float_r">{{item.receiptActualTime}}</span></p>
-                            <p><span class="label">收款金额</span><span class="text_333 float_r">￥{{item.receiptAmount}}</span></p>
+                            <p><span class="label">收款金额(万元)</span><span class="text_333 float_r">{{item.receiptAmount}}</span></p>
                         </div>
                     </div>
                 </swiper-item>
@@ -93,7 +133,7 @@
                     <div class="scroll-box">
                         <div class="amount" v-for="(item, index) in billings" :key="index">
                             <p><span class="label">开票日期</span><span class="text_333 float_r">{{item.invoiceTime}}</span></p>
-                            <p><span class="label">开票金额</span><span class="text_333 float_r">￥{{item.invoiceAmount}}</span></p>
+                            <p><span class="label">开票金额(万元)</span><span class="text_333 float_r">{{item.invoiceAmount}}</span></p>
                         </div>
                     </div>
                 </swiper-item>
@@ -103,7 +143,7 @@
                             <span  class="inline_block text-ellipsis w320 text_333">{{item.fileName}}</span>
                             <span class="float_r"><i class="iconfont icon-shanchu icon_handle" @click="delAnnex(item.id)"></i></span>
                         </p> 
-                        <p><span class="font12">{{formatDate(new Date(item.upTime), 'yyyy-MM-dd hh:mm:ss')}}</span></p>
+                        <p><span class="font12">{{iosDate(item.upTime, 'yyyy-MM-dd hh:mm:ss')}}</span></p>
                     </div>
                 </swiper-item>
                 <swiper-item class="tab-item7">
@@ -117,7 +157,21 @@
                 </swiper-item>
             </swiper>
         </div>
+        
         <!-- 转给他人 -->
+        <popup v-model="popup3" class="turn-box" @on-show="showPopup3" height="100%">
+            <group gutter='0' label-width="150px">
+                <cell is-link title="新拥有者" @click.native="popup1 = true" v-model="staffName" class="font14"></cell>
+                <cell class="font14">
+                    <div slot="title" style="width: 200px;">保留原拥有者为团队成员</div>
+                    <check-icon :value.sync="checkBox1"></check-icon>
+                </cell>
+            </group>
+            <div class="add">
+                <a class=" vux-1px-r" @click="popup3 = false">取消</a>
+                <a @click="turnSave">确定</a>
+            </div>
+        </popup>
         <popup v-model="popup1" @on-show="showPopup1" height="100%">
             <div class="popup0">
                 <search
@@ -140,7 +194,7 @@
 
     import { XHeader, Actionsheet, TransferDom, ButtonTab, ButtonTabItem } from 'vux'
     import { Divider } from 'vux'
-    import { Tab, TabItem, Sticky, XButton, Swiper, SwiperItem, XTable, Search, Popup } from 'vux'
+    import { Tab, TabItem, Sticky, XButton, Swiper, SwiperItem, XTable, Search, Popup, Group, Cell, CheckIcon } from 'vux'
 
     export default {
         components: {
@@ -159,34 +213,47 @@
             XTable,
             Search,
             Popup,
+            Group, 
+            Cell, 
+            CheckIcon,
         },
         data () {
             return {
                 tabIndex: 0,
                 query: {},              //  url参数
                 baseInfo: {},           //  合同信息
+                customer: {},           //  客户信息
                 fieldList: [],          //  合同字段信息
                 receiptPlans: [],       //  收款计划
                 receipts: [],           //  收款记录
                 billings: [],           //  开票记录
                 annexList: [],          //  附件列表
                 logs: [],               //  日志记录
+                memberList: [],         //  团队成员
+                isModify: false,        //  是否有编辑权限
+                isDownload: false,      //  是否有下载权限
+                isOwner: false,         //  是否是拥有者
 
                 //  拥有者
                 popup1: false,
                 results1: [],                        //  搜索结果
                 staffs: [],
                 searchValue1: '',                    //  搜索文本
+                popup3: false,                      
+                staffName: '',              //  转给他人姓名
+                staffId: '',              //  转给他人id
+                checkBox1: false,           //  保留原拥有者为团队成员
             }
         },
         mounted(){
             this.getFieldList()
+            this.getAllStaff()
         },
         activated(){
             this.query = this.$router.currentRoute.query
             this.$vux.loading.show()
             this.getContract()
-            this.getAllStaff()
+            this.getMembers()
         },
         methods: {  
             //  获取合同信息
@@ -194,24 +261,34 @@
                 this.$post("/crm/contractDetailPR/queryContractForOne", {id: this.query.id}, (data) => {
                     this.baseInfo = data.contract
                     this.follows = data.follows
+                    this.customer = data.customer
+                    this.isModify = data.isModify
+                    this.isDownload = data.isDownload
+                    this.isOwner = data.isOwner
                     this.getInfoByindex(this.tabIndex)
+                })
+            },
+            //  获取团队成员
+            getMembers(){
+                this.$post("/crm/memberPR/getAll", {"parentId": this.query.id, "moduleName": "crm_marketing_contract"}, (data) => {
+                    this.memberList = data.list
                 })
             },
             //  根据当前swiper来加载对应内容
             getInfoByindex(val){
-                if(val == 1){
+                if(val == 2){
                     this.getReceiptPlans()
                 }
-                if(val == 2){
+                if(val == 3){
                     this.getReceipts()
                 }
-                if(val == 3){
+                if(val == 4){
                     this.getBillings()
                 }
-                if(val == 4){
+                if(val == 5){
                     this.getAttachs()
                 }
-                if(val == 5){
+                if(val == 6){
                     this.getLogs()
                 }
             },
@@ -233,6 +310,31 @@
                 })
             },
         /**---------------------------------------------转给他人--------------------------------------------- */
+            //  打开弹框清空表单
+            showPopup3(){
+                this.staffName = ''
+                this.staffId = ''
+                this.checkBox1 = false
+            },
+            //  确定转给他人
+            turnSave(){
+                console.log()
+                if(!this.staffId){
+                    this.toastFail("请选择新拥有者！", "200px")
+                    return
+                }
+                let list = [this.query.id]
+                let params = {
+                    list: list,
+                    ownerId: this.staffId,
+                    ifLeft: this.checkBox1,
+                }
+                this.$post("/crm/contractPR/turnOther", params, (data) => {
+                    this.toastSuccess("转移成功！")
+                    this.popup3 = false
+                    this.goBack()
+                })
+            },
             //  获取所员工
             getAllStaff(){
                 this.$post("/crm/getAllStaff", {}, (data) => {
@@ -258,16 +360,9 @@
             //  转给他人
             resultClick1 (item) {
                 if(item.id){
-                    let params = {
-                        list: [this.query.id],
-                        ownerId: item.id
-                    }
-                    this.$vux.loading.show()
-                    this.$post("/crm/contractPR/turnOther", params, (data) => {
-                        this.toastSuccess("转移成功！")
-                        this.popup1 = false
-                        this.goBack()
-                    })
+                    this.staffName = item.name
+                    this.staffId = item.id
+                    this.popup1 = false
                 }
             },
             getResult1 (val) {
@@ -518,6 +613,27 @@
             top: 9px;
             right: 10px;
             background: @baseColor;
+        }
+    }
+    .add{
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 40px;
+        border-top: 1px solid @baseColor;
+        display: flex;
+        font-size: 14px;
+        background: #fff;
+        z-index: 5;
+        a{
+            flex: 1;
+            text-align: center;
+            line-height: 40px;
+            color: @baseColor;
+            &.active{
+                background: @baseColor;
+                color: #fff;
+            }
         }
     }
 </style>

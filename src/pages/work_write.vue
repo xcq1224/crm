@@ -138,6 +138,14 @@
             }
         },
         activated(){
+            this.summary0 = ''
+            this.summary1 = ''
+            this.summary2 = ''
+            this.otherItem0 = ''
+            this.otherItem1 = ''
+            this.otherItem2 = ''
+            let query = this.$router.currentRoute.query
+            this.tabIndex = parseInt(query.handleType)
             this.date = this.formatDate(new Date(), "yyyy-MM-dd")
             this.week = this.getWeek()
             this.month = this.formatDate(new Date(), "yyyy-MM")

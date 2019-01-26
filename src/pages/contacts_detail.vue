@@ -20,7 +20,7 @@
                         <x-table :cell-bordered="false" :content-bordered="false" :full-bordered="false">
                             <tr>
                                 <td width='100'>照片</td>
-                                <td></td>
+                                <td><img v-show="baseInfo.avatarPath" width="60" height="60" :src="baseInfo.avatarPath" /></td>
                             </tr>
                             <tr v-for="(item, index) in addLabel" :key="index">
                                 <td>{{item.label}}</td>
@@ -70,7 +70,7 @@
                                 <span  class="inline_block text-ellipsis w270 text_base">{{item.opportunityName}}</span>
                                 <span class="float_r font12">{{item.createTime.split(' ')[0]}}</span>
                             </p> 
-                            <p><span class="inline_block text-ellipsis w270">￥{{item.amount}}&nbsp;&nbsp;{{item.customerName}}</span><span class="float_r font12">{{item.marketingSection}}</span></p>
+                            <p><span class="inline_block text-ellipsis w270">{{item.amount}}万元&nbsp;&nbsp;{{item.customerName}}</span><span class="float_r font12">{{item.marketingSection}}</span></p>
                         </div>
                     </div>
                 </swiper-item>

@@ -26,7 +26,7 @@
                     <span class="float_r font12">{{item.createTime.split(" ")[0]}}</span>
                 </p> 
                 <p>
-                    <span class="inline_block text-ellipsis w270">￥{{item.amount}}&nbsp;&nbsp;{{item.customerName}}</span>
+                    <span class="inline_block text-ellipsis w270">{{item.amount}}(万元)&nbsp;&nbsp;{{item.customerName}}</span>
                     <span class="float_r font12">{{item.marketingSection}}</span>
                 </p>
             </router-link>
@@ -169,7 +169,7 @@
                 value: '',
                 is_search: false,
                 currentPage: 1,
-                pageSize: 20,
+                pageSize: 200,
                 tableData: []
             }
         },

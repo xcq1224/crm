@@ -218,8 +218,7 @@
 
             resultClick2 (item) {
                 if(item.id){
-                    this.formAdd.copyToUserCname = item.name
-                    this.formAdd.copyToUserId = item.id
+                    this.formAdd.copyToUserCname = item.name + "(" + item.id +  ")"
                     this.popup2 = false
                 }
             },

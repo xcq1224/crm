@@ -2,6 +2,13 @@
     <div class="page"> 
         <div class="main">
             <group gutter='0' label-width="100px">
+                <div class="weui-cell">
+                    <span style="display: inline-block; width:100px;">照片</span>
+                    <div class="img-box" :style="'backgroundImage: url(' + imgUrl() + ')'">
+                        <i v-show="!(imgSrc || formAdd.avatarPath)" class="iconfont icon-add1"></i>
+                        <input ref="uploadPicture" @change="uploadPicture" type="file" accept="image/*">  
+                    </div>
+                </div>
                 <cell v-if="query.handleType == '0'" is-link v-model="formAdd.customerName" @click.native="popup0 = true">
                     <div slot="title"><span style="color: red;">* </span>客户名称</div>
                 </cell>
@@ -83,7 +90,7 @@
                 tagValue: '',
                 popup0: false,
 
-
+                imgSrc: '',
 
 
                 formAdd: {tags: []},
@@ -97,6 +104,7 @@
         },
         activated(){
             this.formAdd = {tags: []}
+            this.imgSrc = ""
             this.query = this.$router.currentRoute.query
             if(this.query.handleType == '1'){
                 document.title = '编辑联系人'
@@ -127,6 +135,18 @@
             }
         },
         methods: {
+        /************************************添加照片********************************* */
+            uploadPicture(e){
+                if(e.target.files.length) this.imgSrc = e.target.files[0]
+                e.target.value = ''
+            },
+            //  将文件流转化为url
+            getUrl(file){
+                return file ? URL.createObjectURL(file) : null
+            },
+            imgUrl(){
+                return this.imgSrc ? this.getUrl(this.imgSrc) : this.formAdd.avatarPath
+            },
         /************************************添加标签****************************** */
             editStart(){
                 this.editTag = true
@@ -201,6 +221,7 @@
                 let params = new FormData()
                 let formAdd = this.deepClone(this.formAdd)
                 delete formAdd.customerName
+                params.append("avatar", this.imgSrc)
                 if(this.query.handleType == '0' || this.query.handleType == '2'){
                     params.append('contactsAdd', JSON.stringify(formAdd))
                     this.$post("/crm/contactsPR/addCrmContacts", params, (data) => {
@@ -255,6 +276,29 @@
                 color: #fff;    
                 background: @baseColor;
             }
+        }
+    }
+    .img-box{
+        width: 60px;
+        height: 60px;
+        border: 1px solid #ddd;
+        text-align: center;
+        position: relative;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        i{
+            font-size: 40px;
+            color: #ccc;
+            line-height: 62px;
+        }
+        input{
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
         }
     }
 </style>

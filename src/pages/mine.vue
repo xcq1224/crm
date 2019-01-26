@@ -2,22 +2,22 @@
     <div class="has-tabbar page"> 
         <div class="main">
             <group gutter='0' class="header">
-                <cell class="cell" is-link link="./personal_info">
-                    <img src="../assets/avatar.jpg" alt="" slot="icon">
+                <cell class="cell">
+                    <img :src="userInfo.headimgurl" alt="" slot="icon">
                     <div slot="title" class="title">
-                        <p>张三</p>
-                        <p>湖北省联通有限公司</p>
+                        <p>{{userInfo.cname}}</p>
+                        <p>{{userInfo.mobile}}</p>
                     </div>
                 </cell>
             </group>
             <div class="empty-box"></div>
-            <group gutter='0'>
-                <cell class="cell" is-link link="./change_password">
+            <group gutter='0' v-if="wxType != 'qywx'">
+                <!-- <cell class="cell" is-link link="./change_password">
                     <span slot="title"><i class="iconfont icon-iconfontmima" style="color: #6ccac9;"></i>修改密码</span>
                 </cell>
                 <cell class="cell" is-link link="./feedback">
                     <span slot="title"><i class="iconfont icon-yijianfankui" style="color: #a9d96c;"></i>意见反馈</span>
-                </cell>
+                </cell> -->
                 <cell class="cell" is-link @click.native="logout">
                     <span slot="title"><i class="iconfont icon-icon" style="color: #7c8dc1;"></i>退出</span>
                 </cell>  
@@ -46,11 +46,17 @@
         data () {
             return {
                 tabIndex: 0,
-
+                userInfo: {},
+                wxType: '',
             }
         },
+        created(){
+            this.wxType = this.$store.state.wxType
+        },
         activated(){
-            
+            this.$post("/crm/getUserInfo", {}, (data) => {
+                this.userInfo = data.userInfo
+            })
         },
         // deactivated(){
         //     console.log(3);
@@ -75,7 +81,7 @@
 <style lang="less" scoped>
     @baseColor: #16A4FA;
     .page{
-        background: #fff;
+        // background: #fff;
     }
     .main{
         .empty-box{

@@ -15,8 +15,8 @@
                     <div slot="title"><span style="color: red;">* </span>拥有者</div>
                 </cell>
             </group>
-            <div class="submit-btn" @click="save">保存</div>
         </div>
+        <div class="submit-btn" @click="save">保存</div>
         <!-- 添加合作伙伴 -->
         <popup v-model="popup2" @on-show="showPopup2" height="100%">
             <div class="popup0">
@@ -271,6 +271,7 @@
         background: #f2f2f2;
     }
     .main{
+        padding-bottom: 40px;
         .textarea{
             font-size: 14px;
         }
@@ -288,16 +289,6 @@
                 left: 0;
             }
         }
-        .submit-btn{
-            text-align: center;
-            width: 100%;
-            height: 40px;
-            color: #fff;
-            background: @baseColor;
-            line-height: 40px;
-            position: absolute;
-            bottom: 0;
-        }
         .weui-switch{
             width: 42px;
             height: 24px;
@@ -306,6 +297,17 @@
                 width: 40px;
             }
         }
+    }
+    .submit-btn{
+        text-align: center;
+        width: 100%;
+        height: 40px;
+        color: #fff;
+        background: @baseColor;
+        line-height: 40px;
+        position: absolute;
+        bottom: 0;
+        z-index: 5;
     }
 </style>
 
