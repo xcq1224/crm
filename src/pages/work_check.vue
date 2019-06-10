@@ -4,7 +4,8 @@
             <div>
                 <group gutter='0'>
                     <cell class="cell header">
-                        <img src="../assets/avatar.jpg" alt="" slot="icon">
+                        <!-- <img src="../assets/avatar.jpg" alt="" slot="icon"> -->
+                        <font slot="icon" class="iconfont icon-morentouxiang iconHeader"></font>
                         <div slot="title" class="title">
                             <p class="text_333">{{workReport.createUserName}}</p>
                             <p class="text_999">{{workReport.createTime}}</p>
@@ -435,6 +436,12 @@
             text-align: center;
             padding-bottom: 12px;
         }
+    }
+    .iconHeader{
+        font-size: 36px;
+        line-height: 36px;
+        margin-right: 8px;
+        vertical-align: middle;
     }
 </style>
 

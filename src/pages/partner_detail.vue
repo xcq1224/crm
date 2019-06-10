@@ -102,9 +102,9 @@
                 </swiper-item>
                 <swiper-item class="tab-item3">
                     <div class="scroll-box" v-if="contacts.length">
-                        <router-link :to="'./contacts_detail?id='+item.id" style="display: block;" class="contacts text_base" v-for="(item, index) in contacts" :key="index">
-                            <img v-if="item.avatar" :src="item.avatar" alt="">
-                            <img v-if="!item.avatar" src="../assets/avatar.jpg" alt="">
+                        <router-link :to="'./partner_contact?id='+item.id" style="display: block;" class="contacts text_base" v-for="(item, index) in contacts" :key="index">
+                            <img v-if="item.avatar" :src="item.avatarPath" alt="">
+                            <font v-else class="iconfont icon-morentouxiang iconHeader"></font>
                             {{item.name}}
                         </router-link>
                     </div>
@@ -280,7 +280,7 @@
             this.getAllStaff()
         },
         activated(){
-            // this.tabIndex = 0
+            this.tabIndex = 0
             this.baseInfo = {}
             this.follows = []
             this.$vux.loading.show()
@@ -616,11 +616,12 @@
             width: 100%;
             height: 40px;
             background: #fff;
-            border-top: 1px solid #ddd;
+            border-top: 1px solid @baseColor;
             z-index: 2;
             display: flex;
             text-align: center;
             line-height: 40px;
+            color: @baseColor;
             .footer-tab{
                 flex: 1;
                 position: relative;
@@ -660,6 +661,7 @@
         .contacts{
             padding: 8px 12px;
             border-bottom: 1px solid #ddd;
+            overflow: hidden;
             img{
                 margin-right: 8px;
                 width: 36px;
@@ -710,6 +712,12 @@
                 color: #fff;
             }
         }
+    }
+    .iconHeader{
+        font-size: 36px;
+        line-height: 36px;
+        margin-right: 8px;
+        vertical-align: middle;
     }
 </style>
 

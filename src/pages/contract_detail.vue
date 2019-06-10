@@ -63,6 +63,10 @@
                                 <td>{{baseInfo.selfSignatory}}</td>
                             </tr>
                             <tr>
+                                <td>营销经理</td>
+                                <td>{{baseInfo.businessManagerName}}</td>
+                            </tr>
+                            <tr>
                                 <td>拥有者</td>
                                 <td>{{baseInfo.ownerCname}}</td>
                             </tr>
@@ -250,6 +254,7 @@
             this.getAllStaff()
         },
         activated(){
+            this.tabIndex = 0
             this.query = this.$router.currentRoute.query
             this.$vux.loading.show()
             this.getContract()

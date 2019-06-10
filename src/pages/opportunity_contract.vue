@@ -21,7 +21,7 @@
                     <div slot="title">我方签约人</div>
                 </cell>
                 <cell is-link v-model="formAdd.businessManagerName" @click.native="popup6 = true">
-                    <div slot="title"><span style="color: red;">* </span>经营经理</div>
+                    <div slot="title"><span style="color: red;">* </span>营销经理</div>
                 </cell>
                 <cell is-link v-model="formAdd.ownerCname" @click.native="popup3 = true">
                     <div slot="title"><span style="color: red;">* </span>合同负责人</div>
@@ -127,7 +127,7 @@
                 query: {},  
                 formAdd: {dealPossible: ''},
                 addLabel: [],
-                requiredList: ["contractName", "contracAmount", "signatoryTime"],             //  必填字段
+                requiredList: ["contractName", "contracAmount"],             //  必填字段
 
                 //  拥有者
                 popup3: false,
@@ -180,7 +180,7 @@
             //  获取员工
             getStaffs(){
                 this.$post("/crm/getAllStaff", {}, (data) => {
-                    this.formAdd.ownerCname = data.username + '/' + data.userid
+                    this.formAdd.ownerCname = data.userid + '/' + data.username
                     this.staffs = []
                     data.list.map((item) => {
                         this.staffs.push({
@@ -204,16 +204,12 @@
                     this.toastFail("请输入合同金额")
                     return;
                 }
-                if(!this.formAdd.signatoryTime){
-                    this.toastFail("请选择签约日期")
-                    return;
-                }
                 if(!this.formAdd.financialManagerName){
                     this.toastFail("请选择财务经理", "160px")
                     return;
                 }
                 if(!this.formAdd.businessManagerName){
-                    this.toastFail("请选择经营经理", "160px")
+                    this.toastFail("请选择营销经理", "160px")
                     return;
                 }
                 if(!this.formAdd.ownerCname){
@@ -221,6 +217,7 @@
                     return;
                 }
                 let formAdd = this.deepClone(this.formAdd)
+                this.$vux.loading.show()
                 this.$post("/crm/opportunityDetailPR/formContract", {id: this.query.id, formContract:formAdd}, (data) => {
                     this.toastSuccess("添加成功")
                     this.goBack()

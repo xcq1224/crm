@@ -126,6 +126,7 @@
             }
         },
         activated(){
+            this.tabIndex = 0
             this.$vux.loading.show()
             this.query = this.$router.currentRoute.query
             this.$post("/crm/contactsDetailPR/queryContactsForOne", {id: this.query.id}, (data) => {

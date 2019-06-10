@@ -139,11 +139,14 @@ textarea {
   background: #16A4FA;
   color: #fff;
 }
-.page .crm_detial_header .dots a i.vux-icon-dot {
-  background-color: #fff;
+.page .crm_detial_header a i.vux-icon-dot {
+  background-color: #0f73ec;
   height: 10px;
   width: 10px;
   border-radius: 50%;
+}
+.page .crm_detial_header a i.vux-icon-dot.active {
+  background-color: #fff;
 }
 .page .crm_detial_header .item1 {
   padding-top: 20px;

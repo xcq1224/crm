@@ -108,7 +108,8 @@
                     data.customers.map(item => {
                         this.customers.push({
                             title: item.name,
-                            id: item.id
+                            id: item.id,
+                            type: 'customer'
                         })
                     })
                     this.results1 = this.customers
@@ -120,7 +121,8 @@
                     data.partner.map(item => {
                         this.customers.push({
                             title: item.name,
-                            id: item.id
+                            id: item.id,
+                            type: 'partner'
                         })
                     })  
                     this.results1 = this.customers
@@ -188,6 +190,7 @@
             resultClick1 (item) {
                 if(item.id){
                     this.formAdd.customerId = item.id
+                    this.formAdd.customerType = item.type
                     this.customerName = item.title
                     this.popup1 = false
                 }

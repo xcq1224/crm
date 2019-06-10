@@ -189,7 +189,7 @@
             this.getAllStaff()
         },
         activated(){
-            // this.tabIndex = 0
+            this.tabIndex = 0
             this.baseInfo = {}
             this.$vux.loading.show()
             this.query = this.$router.currentRoute.query
@@ -198,6 +198,7 @@
                 this.isModify = data.isModify
                 this.isDownload = data.isDownload
                 this.isOwner = data.isOwner
+                this.$vux.loading.show()
                 this.getInfoByindex(this.tabIndex)
             })
             this.getMembers()

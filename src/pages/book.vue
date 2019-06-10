@@ -11,9 +11,10 @@
                 top="0"
                 @on-cancel="isSearch = false"
                 @on-focus="isSearch = true"
+                placeholder="请输入姓名搜索"
                 ref="search">
             </search>
-            group gutter='10px' v-show="!isSearch">
+            <group gutter='10px' v-show="!isSearch">
                 <my-tree :data="theData" @getSubMenu="getSubMenu" :fun="getSubMenu"></my-tree>
             </group>
         </div>
@@ -63,7 +64,16 @@
             this.results5 = []
         },
         methods: {
-                        0resultClick5 (item) {
+            getSubMenu (item, callback) {
+                this.$post("/api/DeptController/getChildDepts", {no: item.no}, (data) => {
+                    item.children = data.list;
+                    if(!data.list.length){
+                        this.$router.push('./staff?no=' + item.no + '&title=' + item.name)
+                    }
+                    callback(data.list)
+                })
+            },
+            resultClick5 (item) {
                 if(item.id){
                     this.$router.push('./staff_detail?id='+item.id+'&title='+item.userCname)
                 }

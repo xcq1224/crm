@@ -150,9 +150,12 @@
         /************************************添加标签****************************** */
             editStart(){
                 this.editTag = true
-                setTimeout(() => {
+                // setTimeout(() => {
+                    // this.$refs.tagInput.focus()
+                // }, 20)
+                this.$nextTick(() => {
                     this.$refs.tagInput.focus()
-                }, 0)
+                })
             },
             tagConfirm(){
                 let tagValue = this.tagValue;

@@ -137,6 +137,8 @@ const partner_add = r => require.ensure([], () => r(require('@/pages/partner_add
 const partner_detail = r => require.ensure([], () => r(require('@/pages/partner_detail')), 'partner_detail');
 //  合作伙伴跟进
 const partner_follow = r => require.ensure([], () => r(require('@/pages/partner_follow')), 'partner_follow');
+//  合作伙伴联系人详情
+const partner_contact = r => require.ensure([], () => r(require('@/pages/partner_contact')), 'partner_contact');
 
 //  竞争对手
 const competitor = r => require.ensure([], () => r(require('@/pages/competitor')), 'competitor');
@@ -178,6 +180,13 @@ const routes = [
 		component: partner_detail,
     meta: {
       title:"合作伙伴详情",
+    }
+	},{
+    path: '/partner_contact',
+    name: 'partner_contact',
+		component: partner_contact,
+    meta: {
+      title:"联系人详情",
     }
 	},{
     path: '/partner_follow',

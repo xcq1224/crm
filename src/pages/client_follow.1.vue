@@ -13,7 +13,7 @@
                 <selector v-model="formAdd.followType" title="跟进方式" placeholder="请选择" :options="gjfs"></selector>
             </group>
             <group>
-                <cell v-model="query.name" title="线索名称"></cell>
+                <cell v-model="query.name" title="客户名称"></cell>
                 <selector v-model="formAdd.followStatus" title="跟进状态" placeholder="请选择" :options="gjzt"></selector>
                 <cell is-link v-model="formAdd.contactCname" title="拜访人员" @click.native="popup1 = true"></cell>
                 <cell is-link v-model="formAdd.copyToUserCname" title="通知人" @click.native="popup2 = true"></cell>
@@ -24,26 +24,15 @@
         <popup v-model="popup1" @on-show="showPopup1" height="100%">
             <div class="popup0">
                 <search
+                    @result-click="resultClick1"
                     @on-change="getResult1"
+                    :results="results1"
                     v-model="searchValue1"
                     position="absolute"
                     auto-scroll-to-top
                     top="0"
                     @on-cancel="onCancel1"
                     ref="search1">
-                    <div slot="right" class="submit-search" @click="chooseSure1">确定</div>
-                    <div slot="">
-                        <checker
-                            v-model="chooseList1"
-                            type="checkbox"
-                            default-item-class="demo-item"
-                            selected-item-class="demo-item-selected"
-                        >
-                            <checker-item :disabled="!item.id" v-for="(item, index) in results1" :key="index" :value="item.title">
-                                <p>{{item.title}} <x-icon class="icon-check" type="ios-checkmark-empty" fill="#16A4FA" size="40"></x-icon></p>
-                            </checker-item>
-                        </checker>
-                    </div>
                 </search>
             </div>
         </popup>
@@ -51,26 +40,15 @@
         <popup v-model="popup2" @on-show="showPopup2" height="100%">
             <div class="popup0">
                 <search
+                    @result-click="resultClick2"
                     @on-change="getResult2"
+                    :results="results2"
                     v-model="searchValue2"
                     position="absolute"
                     auto-scroll-to-top
                     top="0"
                     @on-cancel="onCancel2"
                     ref="search2">
-                    <div slot="right" class="submit-search" @click="chooseSure2">确定</div>
-                    <div slot="">
-                        <checker
-                            v-model="chooseList2"
-                            type="checkbox"
-                            default-item-class="demo-item"
-                            selected-item-class="demo-item-selected"
-                        >
-                            <checker-item :disabled="!item.id" v-for="(item, index) in results2" :key="index" :value="item.title">
-                                <p>{{item.title}} <x-icon class="icon-check" type="ios-checkmark-empty" fill="#16A4FA" size="40"></x-icon></p>
-                            </checker-item>
-                        </checker>
-                    </div>
                 </search>
             </div>
         </popup>
@@ -80,7 +58,7 @@
 <script>
 
     import { XHeader, Actionsheet, TransferDom, ButtonTab, ButtonTabItem } from 'vux'
-    import { Cell, CellBox, CellFormPreview, Group, InlineXSwitch, XTextarea, XInput, Datetime, PopupPicker, Selector, Popup, Search, Checker, CheckerItem } from 'vux'
+    import { Cell, CellBox, CellFormPreview, Group, InlineXSwitch, XTextarea, XInput, Datetime, PopupPicker, Selector, Popup, Search } from 'vux'
 
     export default {
         components: {
@@ -100,8 +78,6 @@
             Selector,
             Popup,
             Search,
-            Checker, 
-            CheckerItem
         },
         data () {
             return {
@@ -113,13 +89,11 @@
                 //  联系人
                 popup1: false,
                 results1: [],                        //  搜索结果
-                chooseList1: [],                    //  选中的联系人
                 contacts: [],
                 searchValue1: '',                    //  搜索文本
                 //  通知人
                 popup2: false,
                 results2: [],                        //  搜索结果
-                chooseList2: [],                    //  选中的联系人
                 staffs: [],
                 searchValue2: '',                    //  搜索文本
             }
@@ -129,16 +103,14 @@
             this.getAllStaff()         
         },
         activated(){
-            this.chooseList1 = []       //  清空选择1
-            this.chooseList2 = []       //  清空选择2
             this.query = this.$router.currentRoute.query
             this.formAdd = {
                 parentId: this.query.id,
-                moduleName: 'crm_marketing_clue',
+                moduleName: 'crm_customer',
                 followTime: this.formatDate(new Date(), "yyyy-MM-dd hh:mm"),
                 followContent: ''
             }
-            this.$post("/crm/contactsDetailPR/queryOtherContacts", {id: this.query.customerId}, (data) => {
+            this.$post("/crm/contactsDetailPR/queryOtherContacts", {id: this.query.id}, (data) => {
                 this.contacts = []
                 data.list.map((item) => {
                     this.contacts.push({
@@ -152,10 +124,10 @@
         methods: {
             //  获取数字字典
             getDict(){
-                let list = ["crm-gjfs", "crm-xs-gjzt"]
+                let list = ["crm-gjfs", "crm-kh-gjzt"]
                 this.$post("/crm/getDict", {"list": list}, (data) => {
                     this.gjfs = data['crm-gjfs']
-                    this.gjzt = data['crm-xs-gjzt']
+                    this.gjzt = data['crm-kh-gjzt']
                 }) 
             },
             //  获取所有员工     
@@ -164,7 +136,7 @@
                     this.staffs = []
                     data.list.map((item) => {
                         this.staffs.push({
-                            title: item.cname + '(' + item.userName + ')',
+                            title: item.userName + " " + item.cname,
                             name: item.cname,
                             id: item.userName
                         })
@@ -205,10 +177,12 @@
                 }, 0);
             },
 
-            //  确定选中
-            chooseSure1 () {
-                this.formAdd.contactCname = this.chooseList1.join(",")
-                this.popup1 = false
+            resultClick1 (item) {
+                if(item.id){
+                    this.formAdd.contactCname = item.title
+                    this.formAdd.contactId = item.id
+                    this.popup1 = false
+                }
             },
             getResult1 (val) {
                 this.results1 = val ? this.match1(val) : this.contacts
@@ -222,8 +196,6 @@
             },
             onCancel1 () {
                 this.popup1 = false
-                this.chooseList1 = []
-                this.formAdd.contactCname = ''
             },
             match1(val){
                 let rs = []
@@ -244,9 +216,11 @@
                 }, 0);
             },
 
-            chooseSure2 () {
-                this.formAdd.copyToUserCname = this.chooseList2.join(",")
-                this.popup2 = false
+            resultClick2 (item) {
+                if(item.id){
+                    this.formAdd.copyToUserCname = item.name + "(" + item.id +  ")"
+                    this.popup2 = false
+                }
             },
             getResult2 (val) {
                 this.results2 = val ? this.match2(val) : this.staffs
@@ -260,8 +234,6 @@
             },
             onCancel2 () {
                 this.popup2 = false
-                this.chooseList2 = []
-                this.formAdd.copyToUserCname = ''
             },
             match2(val){
                 let rs = []
@@ -310,28 +282,6 @@
             position: absolute;
             bottom: 0;
         }
-    }
-    //  搜索确定按钮
-    .submit-search{
-        text-align: center;
-        margin: 3px 6px;
-        color: #fff;
-    }
-    .demo-item{
-        display: block;
-        line-height: 36px;
-        border-bottom: 1px solid #e5e5e5;
-        padding-left: 12px;
-        position: relative;
-    }
-    .demo-item-selected .icon-check{
-        display: block;
-    }
-    .icon-check{
-        position: absolute;
-        right: 2px;
-        display: none;
-        top: 0;
     }
 </style>
 

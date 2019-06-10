@@ -104,8 +104,8 @@
                 <swiper-item class="tab-item3">
                     <div class="scroll-box">
                         <router-link :to="'./contacts_detail?id='+item.id" style="display: block;" class="contacts text_base" v-for="(item, index) in contacts" :key="index">
-                            <img v-if="item.avatar" :src="item.avatar" alt="">
-                            <img v-if="!item.avatar" src="../assets/avatar.jpg" alt="">
+                            <img v-if="item.avatar" :src="item.avatarPath" alt="">
+                            <font v-else class="iconfont icon-morentouxiang iconHeader"></font>
                             {{item.name}}
                         </router-link>
                     </div>
@@ -221,6 +221,7 @@
     import { XHeader, Actionsheet, TransferDom, ButtonTab, ButtonTabItem } from 'vux'
     import { Divider } from 'vux'
     import { Tab, TabItem, Sticky, XButton, Swiper, SwiperItem, XTable, Search, Popup, Group, Cell, CheckIcon } from 'vux'
+import { setTimeout } from 'timers';
 
     export default {
         components: {
@@ -290,7 +291,7 @@
             this.getAllStaff()
         },
         activated(){
-            // this.tabIndex = 0
+            this.tabIndex = 0
             this.baseInfo = {}
             this.follows = []
             this.$vux.loading.show()
@@ -306,7 +307,6 @@
             this.getMembers()
         },
         deactivated(){
-            
         },
         
         methods: {
@@ -731,6 +731,12 @@
                 color: #fff;
             }
         }
+    }
+    .iconHeader{
+        font-size: 36px;
+        line-height: 36px;
+        margin-right: 8px;
+        vertical-align: middle;
     }
 </style>
 

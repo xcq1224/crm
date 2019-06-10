@@ -148,7 +148,7 @@
             //  获取员工
             getStaffs(){
                 this.$post("/crm/getAllStaff", {}, (data) => {
-                    this.formAdd.ownerCname = data.username + '/' + data.userid
+                    this.formAdd.ownerCname = data.userid + '/' + data.username
                     this.staffs = []
                     data.list.map((item) => {
                         this.staffs.push({
@@ -176,7 +176,7 @@
                 }
                 let formAdd = this.deepClone(this.formAdd)
                 delete formAdd.partnerName
-                console.log(formAdd)
+                this.$vux.loading.show()
                 this.$post("/crm/marketingClueDetailPR/formOpportunity", {id: this.query.id, formOpportunity: formAdd}, (data) => {
                     this.toastSuccess("添加成功")
                     this.goBack()

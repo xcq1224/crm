@@ -58,6 +58,7 @@
             this.$vux.loading.show()
         },
         activated(){
+            this.tabIndex = 0
             this.clickTab(0)
         },
         methods: {

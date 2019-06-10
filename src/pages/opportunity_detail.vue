@@ -123,7 +123,8 @@
                     <div class="scroll-box">
                         <div class="contacts" v-for="(item, index) in contacts" :key="index">
                             <span class="img">
-                                <img src="../assets/avatar.jpg" alt=""> 
+                                <img v-if="item.avatar" :src="item.avatarPath" alt=""> 
+                                <font v-else class="iconfont icon-morentouxiang iconHeader"></font>
                                 <i v-if="item.oppoInfo.isMaster" class="iconfont icon-geren"></i>
                             </span>
                             <p class="text_base" @click="jumpCheck('contacts_detail', item.customerId, '', item.id)">{{item.name}}</p>
@@ -291,6 +292,7 @@
             }
         },
         activated(){
+            this.tabIndex = 0
             this.showSubbat = false
             this.$vux.loading.show()
             this.query = this.$router.currentRoute.query
@@ -750,6 +752,12 @@
                 color: #fff;
             }
         }
+    }
+    .iconHeader{
+        font-size: 36px;
+        line-height: 36px;
+        margin-right: 8px;
+        vertical-align: middle;
     }
 </style>
 

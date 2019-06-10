@@ -238,6 +238,7 @@
             this.getAllStaff()
         },
         activated(){
+            this.tabIndex = 0
             this.showSubbat = false
             this.$vux.loading.show()
             this.query = this.$router.currentRoute.query

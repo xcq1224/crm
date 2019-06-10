@@ -25,7 +25,7 @@
                     <div slot="title">我方签约人</div>
                 </cell>
                 <cell is-link v-model="formAdd.businessManagerName" @click.native="popup6 = true">
-                    <div slot="title"><span style="color: red;">* </span>经营经理</div>
+                    <div slot="title"><span style="color: red;">* </span>营销经理</div>
                 </cell>
                 <cell is-link v-if="query.handleType == '0'" v-model="formAdd.ownerCname" @click.native="popup3 = true">
                     <div slot="title"><span style="color: red;">* </span>合同负责人</div>
@@ -172,7 +172,7 @@
             return {
                 query: {},        // handleType  '0' 新增    '1' 编辑
                 formAdd: {},
-                requiredList: ["contractName", "contractNo", "contracAmount", "dept", "signatoryTime"],             //  必填字段
+                requiredList: ["contractName", "contractNo", "contracAmount", "dept"],             //  必填字段
                 addLabel: [],
                 //  客户
                 popup1: false,
@@ -303,10 +303,6 @@
                 let reg = /(^[1-9]([0-9]+)?(\.[0-9]{1,4})?$)|(^(0){1}$)|(^[0-9]\.[0-9]{1,4}?$)/;
                 if(!reg.test(this.formAdd.contracAmount)){
                     this.toastFail("请输入合同总金额(最多四位小数)", "260px")
-                    return;
-                }
-                if(!this.formAdd.signatoryTime){
-                    this.toastFail("请选择签约日期", "160px")
                     return;
                 }
                 if(!this.formAdd.financialManagerName){

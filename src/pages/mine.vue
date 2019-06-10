@@ -11,17 +11,18 @@
                 </cell>
             </group>
             <div class="empty-box"></div>
-            <group gutter='0' v-if="wxType != 'qywx'">
+            <!-- <group gutter='0' v-if="wxType != 'qywx'"> -->
+            <!-- <group gutter='0'> -->
                 <!-- <cell class="cell" is-link link="./change_password">
                     <span slot="title"><i class="iconfont icon-iconfontmima" style="color: #6ccac9;"></i>修改密码</span>
                 </cell>
                 <cell class="cell" is-link link="./feedback">
                     <span slot="title"><i class="iconfont icon-yijianfankui" style="color: #a9d96c;"></i>意见反馈</span>
                 </cell> -->
-                <cell class="cell" is-link @click.native="logout">
+                <!-- <cell class="cell" is-link @click.native="logout">
                     <span slot="title"><i class="iconfont icon-icon" style="color: #7c8dc1;"></i>退出</span>
-                </cell>  
-            </group>
+                </cell>   -->
+            <!-- </group> -->
         </div>
     </div>
 </template>
