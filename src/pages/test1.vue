@@ -1,213 +1,159 @@
-<!--
 <template>
- <div>
- <x-header :left-options="{'showBack': false}">上拉加载，下拉刷新</x-header>
- <scroller use-pullup :pullup-config="pullupDefaultConfig" @on-pullup-loading="loadMore"
-    use-pulldown :pulldown-config="pulldownDefaultConfig" @on-pulldown-loading="refresh"
-    lock-x ref="scrollerBottom" height="-48">
-    <div style="padding: 10px 0">
-      <div class="box" v-for="i in list" :key="i">
-          <p>公司名称{{i}}</p>
-      </div>
+    <div class="page">
+       <baidu-map ref="map" class="map" :center="center" :zoom="zoom" :min-zoom="3" :max-zoom="20" @mousemove="syncPolyline" @click="paintPolyline" @rightclick="newPolyline">
+            <bm-map-type :map-types="['BMAP_NORMAL_MAP', 'BMAP_HYBRID_MAP']" anchor="BMAP_ANCHOR_TOP_LEFT"></bm-map-type>
+            <bm-control class="abc" style="top: 40px;left: 20px;">
+                <button @click="polyline.editing = !polyline.editing">{{ polyline.editing ? '停止绘制' : '开始绘制' }}</button>
+                <span @click="getLocation">定位</span>
+                <span @click="addMarker">打点</span>
+            </bm-control>
+            <bm-control class="cross" style="top: 40px;left: 20px;">
+                <img src="/static/amap/cross.png"/>
+            </bm-control>
+            <bm-geolocation anchor="BMAP_ANCHOR_BOTTOM_RIGHT" :autoLocation="true" @locationSuccess="locationSuccess" @locationError="locationError"></bm-geolocation>
+            <bm-polyline :path="path" v-for="(path, index) in polyline.paths" :key="index"></bm-polyline>
+            <bm-marker @click="markerClick" v-for="(markerPoint, index) in markerPointList" :key="index" :icon="{url: '/static/amap/point.png', size: {width: 32, height: 32}}" :position="markerPoint" :dragging="true"></bm-marker>
+        </baidu-map>
     </div>
- </scroller>
- </div>
 </template>
 <script>
- import {Scroller, XHeader} from 'vux'
- 
- const pulldownDefaultConfig = {
-    content: '下拉刷新',
-    height: 40,
-    autoRefresh: false,
-    downContent: '下拉刷新',
-    upContent: '释放后刷新',
-    loadingContent: '正在刷新...',
-    clsPrefix: 'xs-plugin-pulldown-'
- }
- const pullupDefaultConfig = {
-    content: '上拉加载更多',
-    pullUpHeight: 60,
-    height: 40,
-    autoRefresh: false,
-    downContent: '释放后加载',
-    upContent: '上拉加载更多',
-    loadingContent: '加载中...',
-    clsPrefix: 'xs-plugin-pullup-'
- }
- export default {
- components: {
-  XHeader,
-  Scroller
- },
- mounted() {
-  this.$nextTick(() => {
-    this.$refs.scrollerBottom.reset({top: 0})
-  })
-  this.loadMore()
- },
- data() {
-  return {
-    list: 10,
-    pullupDefaultConfig: pullupDefaultConfig,
-    pulldownDefaultConfig: pulldownDefaultConfig
-  }
- },
- methods: {
-  fetchData(cb) {
-    this.list = this.list + 10
-    cb(this.list)
-  },
-  refresh() {
-   this.list = this.list + 10
-   this.$refs.scrollerBottom.enablePullup()
-   this.$refs.scrollerBottom.donePulldown()
-  },
-  loadMore() {
-    if (this.list >= 10) {
-      this.$refs.scrollerBottom.disablePullup()
+    export default {
+        data () {
+            return {
+                center: {
+                    lng: 116.404, 
+                    lat: 39.915
+                },
+                zoom: 16,
+                polyline: {
+                    editing: false,
+                    paths: [
+                        [{
+                            lat: 23.117628,
+                            lng: 114.408251
+                        },{
+                            lat: 23.116232,
+                            lng: 114.404334
+                        },{
+                            lat: 23.11457,
+                            lng: 114.408143
+                        }],
+                        [{
+                            lat: 23.11353985,
+                            lng: 114.41065808
+                        },{
+                            lat: 23.117628,
+                            lng: 114.408251
+                        }],
+                    ]
+                },
+                // markerPoint: [{
+                //     lat: 39.935584,
+                //     lng: 116.405078
+                // },{
+                //     lat: 39.92651,
+                //     lng: 116.399329
+                // }],
+                markerPointList: [],
+            }
+        },
+        activated(){
+            this.getLocation()
+        },
+        methods: {
+            getLocation(){
+                console.log(2241)
+                var geolocation = new BMap.Geolocation();
+                geolocation.getCurrentPosition((r) =>{    
+                    console.log(r) 
+                    this.center = r.point
+                },{enableHighAccuracy: true})
+            },
+            //  添加点
+            addMarker(){
+                let point = this.$refs.map.map.getCenter()
+                this.markerPointList.push(point)
+            },
+            //  点击点
+            markerClick(){
+                console.log(6666)
+            },
+            locationSuccess(){
+            },
+            locationError(){
+            },
+            syncPolyline (e) {
+                if (!this.polyline.editing) {
+                    return
+                }
+                const {paths} = this.polyline
+                if (!paths.length) {
+                    return
+                }
+                const path = paths[paths.length - 1]
+                console.log(555)
+                if (!path.length) {
+                    console.log(4444)
+                    return
+                }
+                if (path.length === 1) {
+                    path.push(e.point)
+                }
+                this.$set(path, path.length - 1, e.point)
+                console.log(this.polyline)
+            },
+            newPolyline (e) {
+                console.log(222)
+                if (!this.polyline.editing) {
+                    return
+                }
+                const {paths} = this.polyline
+                if(!paths.length) {
+                    paths.push([])
+                }
+                const path = paths[paths.length - 1]
+                path.pop()
+                if (path.length) {
+                    paths.push([])
+                }
+                console.log(this.polyline)
+            },
+            paintPolyline (e) {
+                console.log(333)
+                if (!this.polyline.editing) {
+                    return
+                }
+                const {paths} = this.polyline
+                !paths.length && paths.push([])
+                paths[paths.length - 1].push(e.point)
+                console.log(e.point)
+                
+            }
+        }
     }
-    this.list = this.list + 10
-    this.$refs.scrollerBottom.donePullup()
-  }
- }
- }
 </script>
 <style lang="less">
- .box {
- padding: 30px 10px;
- }
- .xs-plugin-pulldown-container {
- line-height: 40px;
- }
- .xs-plugin-pullup-container {
- line-height: 40px;
- }
-</style>
--->
-
-
-
-<template>
- <div class="page">
- <x-header :left-options="{'showBack': false}">上拉加载，下拉刷新</x-header>
- <div class="main">
- 	
- 
-	 <scroller use-pullup :pullup-config="pullupDefaultConfig" @on-pullup-loading="loadMore"
-	    use-pulldown :pulldown-config="pulldownDefaultConfig" @on-pulldown-loading="refresh"
-	    lock-x ref="scrollerBottom" height="-48">
-	  <div style="padding: 10px 0">
-	  <div class="box" v-for="(item, index) in list" :key="index">
-	   <p class="list">公司名称{{index}}</p>
-	  </div>
-	  </div>
-	 </scroller>
- </div>
- </div>
-</template>
-<script>
- import {Scroller, XHeader} from 'vux'
- import axios from 'axios'
-import { setTimeout } from 'timers';
- 
- const pulldownDefaultConfig = {
- content: '下拉刷新',
- height: 40,
- autoRefresh: false,
- downContent: '下拉刷新',
- upContent: '释放后刷新',
- loadingContent: '正在刷新...',
- clsPrefix: 'xs-plugin-pulldown-'
- }
- const pullupDefaultConfig = {
- content: '上拉加载更多',
- pullUpHeight: 60,
- height: 40,
- autoRefresh: false,
- downContent: '释放后加载',
- upContent: '上拉加载更多',
- loadingContent: '加载中...',
- clsPrefix: 'xs-plugin-pullup-'
- }
- export default {
- components: {
-  XHeader,
-  Scroller
- },
- mounted() {
-  this.$nextTick(() => {
-    this.$refs.scrollerBottom.reset({top: 0})
-  })
-  this.loadMore()
- },
- data() {
-  return {
-  list: 0,
-  pullupDefaultConfig: pullupDefaultConfig,
-  pulldownDefaultConfig: pulldownDefaultConfig
-  }
- },
- methods: {
-  fetchData(cb) {
-    var data = {"list": [1,2,3,4,5]}
-    var that = this
-  setTimeout(function(){
-    that.$nextTick(() => {
-      that.$refs.scrollerBottom.reset()
-   })
-    cb(10)
-  }, 200)
-  },
-  refresh() {
-    console.log(3)
-  this.fetchData(data => {
-   this.list = 10
-   this.$refs.scrollerBottom.enablePullup()
-   this.$refs.scrollerBottom.donePulldown()
-  })
-  },
-  loadMore() {
-  this.fetchData(data => {
-      if (this.list >= 40) {
-      		this.$refs.scrollerBottom.disablePullup()
-      }else{
-      	
-	    console.log(4)
-	   	this.list += 10
-	   	this.$refs.scrollerBottom.donePullup()
-      }
-  })
-  }
- }
- }
-</script>
-<style lang="less">
-	.page{
-		padding-bottom: 46px;
-	}
-	.main{
-		padding-top: 46px;
-	}
- .box {
- padding: 5px 10px 5px 10px;
- &:first-child {
-  padding: 0 10px 5px 10px;
- }
- &:last-child {
-  padding: 5px 10px 0 10px;
- }
- }
- .list {
- background-color: #fff;
- border-radius: 4px;
- border: 1px solid #f0f0f0;
- padding: 30px;
- }
- .xs-plugin-pulldown-container {
- line-height: 40px;
- }
- .xs-plugin-pullup-container {
- line-height: 40px;
- }
+    .page>div{
+        height: 100%;
+        overflow: hidden;
+    }
+    .BMap_cpyCtrl, .anchorBL{
+        display: none;
+    }
+    .abc{
+        top: 40px !important;
+        left: 20px !important;
+    }
+    .cross{
+        width: 32px;
+        height: 32px;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        margin: auto;
+        img{
+            display: block;
+        }
+    }
 </style>
