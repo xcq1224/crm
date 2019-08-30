@@ -1,6 +1,6 @@
 <template>
     <div class="page">
-       <baidu-map ref="map" class="map" :center="center" :zoom="zoom" :min-zoom="3" :max-zoom="20" @mousemove="syncPolyline" @click="paintPolyline" @rightclick="newPolyline">
+       <baidu-map ref="map" :dragging="false" class="map" :center="center" :zoom="zoom" :min-zoom="16" :max-zoom="20" @mousemove="syncPolyline" @click="paintPolyline" @rightclick="newPolyline">
             <bm-map-type :map-types="['BMAP_NORMAL_MAP', 'BMAP_HYBRID_MAP']" anchor="BMAP_ANCHOR_TOP_LEFT"></bm-map-type>
             <bm-control class="abc" style="top: 40px;left: 20px;">
                 <button @click="polyline.editing = !polyline.editing">{{ polyline.editing ? '停止绘制' : '开始绘制' }}</button>
@@ -10,8 +10,13 @@
             <bm-control class="cross" style="top: 40px;left: 20px;">
                 <img src="/static/amap/cross.png"/>
             </bm-control>
+            <bm-info-window :position="{lng: 114.315571, lat: 30.59254}" :show="infoWindow.show" @close="infoWindowClose" @open="infoWindowOpen">
+                <p v-text="infoWindow.contents"></p>
+                <span @click="clear">Clear</span>
+            </bm-info-window>
             <bm-geolocation anchor="BMAP_ANCHOR_BOTTOM_RIGHT" :autoLocation="true" @locationSuccess="locationSuccess" @locationError="locationError"></bm-geolocation>
-            <bm-polyline :path="path" v-for="(path, index) in polyline.paths" :key="index"></bm-polyline>
+            <!-- <bm-polyline @click="abcd" :path="path" v-for="(path, index) in polyline.paths" :strokeWeight="10" :clicking="true" :key="index"></bm-polyline> -->
+            <bm-polyline ref="polyline" @click="abcd" :path="polyline.paths[0]" :strokeWeight="10" :clicking="true"></bm-polyline>
             <bm-marker @click="markerClick" v-for="(markerPoint, index) in markerPointList" :key="index" :icon="{url: '/static/amap/point.png', size: {width: 32, height: 32}}" :position="markerPoint" :dragging="true"></bm-marker>
         </baidu-map>
     </div>
@@ -24,36 +29,19 @@
                     lng: 116.404, 
                     lat: 39.915
                 },
+                infoWindow: {
+                    show: true,
+                    contents: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+                },
                 zoom: 16,
                 polyline: {
                     editing: false,
-                    paths: [
-                        [{
-                            lat: 23.117628,
-                            lng: 114.408251
-                        },{
-                            lat: 23.116232,
-                            lng: 114.404334
-                        },{
-                            lat: 23.11457,
-                            lng: 114.408143
-                        }],
-                        [{
-                            lat: 23.11353985,
-                            lng: 114.41065808
-                        },{
-                            lat: 23.117628,
-                            lng: 114.408251
-                        }],
+                    paths: [[]
+                        // [{lat: 30.59254,lng: 114.315571},
+                        // {lat: 30.587722,lng: 114.315823},
+                        // {lat: 30.587286,lng: 114.313703}]
                     ]
                 },
-                // markerPoint: [{
-                //     lat: 39.935584,
-                //     lng: 116.405078
-                // },{
-                //     lat: 39.92651,
-                //     lng: 116.399329
-                // }],
                 markerPointList: [],
             }
         },
@@ -61,22 +49,57 @@
             this.getLocation()
         },
         methods: {
+            infoWindowClose (e) {
+                this.infoWindow.show = false
+            },
+            infoWindowOpen (e) {
+                this.infoWindow.show = true
+            },
+            clear () {
+                console.log(353)
+                this.infoWindow.show = false
+                this.infoWindow.show = false
+            },
+            abcd(){
+                console.log(8888)
+                alert(222)
+            },
             getLocation(){
-                console.log(2241)
                 var geolocation = new BMap.Geolocation();
                 geolocation.getCurrentPosition((r) =>{    
-                    console.log(r) 
                     this.center = r.point
                 },{enableHighAccuracy: true})
             },
             //  添加点
             addMarker(){
+                this.infoWindow.show = true
                 let point = this.$refs.map.map.getCenter()
                 this.markerPointList.push(point)
+
+                var pois = [
+                    new BMap.Point(114.315571,30.59254),
+                    new BMap.Point(114.315823,30.587722),
+                    new BMap.Point(114.313703,30.587286),
+                ];
+                var polyline =new BMap.Polyline(pois, {
+                    enableEditing: false,//是否启用线编辑，默认为false
+                    enableClicking: true,//是否响应点击事件，默认为true
+                    strokeWeight:'20',//折线的宽度，以像素为单位
+                    strokeOpacity: 0.8,//折线的透明度，取值范围0 - 1
+                    strokeColor:"#18a45b" //折线颜色
+                });
+                polyline.addEventListener('touchstart', () => {
+                    console.log(354353463)
+                })
+                polyline.addEventListener('touchend', () => {
+                    console.log(546)
+                })
+                this.$refs.map.map.addOverlay(polyline)
             },
             //  点击点
             markerClick(){
-                console.log(6666)
+                console.log(this.polyline)
+                alert(111)
             },
             locationSuccess(){
             },
@@ -119,7 +142,7 @@
                 console.log(this.polyline)
             },
             paintPolyline (e) {
-                console.log(333)
+                console.log(e.target)
                 if (!this.polyline.editing) {
                     return
                 }
